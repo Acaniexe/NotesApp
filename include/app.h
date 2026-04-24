@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include "input.h"
 #include "canvas.h"
 #include "ui.h"
@@ -8,11 +9,11 @@
 struct App {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
+    SDL_Surface* icon = nullptr;
 
     int windowWidth = 900;
     int windowHeight = 500;
     bool running = true;
-    bool ecsTestDone = false;
 
     InputState input;
     Canvas canvas;

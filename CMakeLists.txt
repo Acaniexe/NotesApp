@@ -12,17 +12,19 @@ file(GLOB SRC_FILES "src/*.cpp")
 
 add_executable(app ${SRC_FILES})
 
+# INCLUDE PATHS
 target_include_directories(app PRIVATE
-    SDL3/include
+    ${CMAKE_SOURCE_DIR}/SDL3/${SDL_ARCH}/include
     ${CMAKE_SOURCE_DIR}/include
-    SDL3_ttf/${SDL_ARCH}/include
-    SDL3_image/${SDL_ARCH}/include
+    ${CMAKE_SOURCE_DIR}/SDL3_ttf/${SDL_ARCH}/include
+    ${CMAKE_SOURCE_DIR}/SDL3_image/${SDL_ARCH}/include
 )
 
+# LINK PATHS
 target_link_directories(app PRIVATE
-    SDL3/lib
-    SDL3_ttf/${SDL_ARCH}/lib
-    SDL3_image/${SDL_ARCH}/lib
+    ${CMAKE_SOURCE_DIR}/SDL3/${SDL_ARCH}/lib
+    ${CMAKE_SOURCE_DIR}/SDL3_ttf/${SDL_ARCH}/lib
+    ${CMAKE_SOURCE_DIR}/SDL3_image/${SDL_ARCH}/lib
 )
 
 target_link_libraries(app
@@ -31,10 +33,27 @@ target_link_libraries(app
     SDL3_image
 )
 
-#add_custom_command(TARGET app POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#        ${CMAKE_SOURCE_DIR}/SDL3/lib/../SDL3.dll
-#        ${CMAKE_SOURCE_DIR}/SDL3_ttf/${SDL_ARCH}/bin/SDL3_ttf.dll
-#        ${CMAKE_SOURCE_DIR}/SDL3_image/${SDL_ARCH}/bin/SDL3_image.dll
-#        $<TARGET_FILE_DIR:app>
-#)
+# COPY DLLs
+add_custom_command(TARGET app POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_SOURCE_DIR}/bin
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/SDL3/${SDL_ARCH}/bin/SDL3.dll
+        ${CMAKE_SOURCE_DIR}/bin/SDL3.dll
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/SDL3_ttf/${SDL_ARCH}/bin/SDL3_ttf.dll
+        ${CMAKE_SOURCE_DIR}/bin/SDL3_ttf.dll
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/SDL3_image/${SDL_ARCH}/bin/SDL3_image.dll
+        ${CMAKE_SOURCE_DIR}/bin/SDL3_image.dll
+)
+
+# COPY ASSETS
+add_custom_command(TARGET app POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:app>/assets
+)

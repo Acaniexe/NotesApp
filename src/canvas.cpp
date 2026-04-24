@@ -51,8 +51,7 @@ void updateCanvas(Canvas& canvas, const InputState& input, int windowWidth, int 
 }
 
 void handleNodeInput(const InputState& input, EntityManager& entityManager, UI& ui, const Canvas& canvas) {
-    if (isMouseOverUI(ui, input.mouseX, input.mouseY) || ui.isDragging)
-        return;
+    if (isMouseOverUI(ui, input.mouseX, input.mouseY) || ui.isDragging) return;
 
     if (input.leftDown) {
         Vec2 world = screenToWorld(canvas, input.mouseX, input.mouseY);

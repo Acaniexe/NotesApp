@@ -9,11 +9,18 @@ bool init(App& app) {
         return false;
     }
 
-    app.window = SDL_CreateWindow("Testing", app.windowWidth, app.windowHeight, SDL_WINDOW_RESIZABLE);
+    app.icon = IMG_Load("assets/Plasma.png");
+    if (!app.icon) {
+        std::cout << "Icon failed: " << SDL_GetError() << std::endl;
+    }
+
+    app.window = SDL_CreateWindow("Plasma Notes", app.windowWidth, app.windowHeight, SDL_WINDOW_RESIZABLE);
     if (!app.window) {
         std::cout << "Window failed: " << SDL_GetError() << std::endl;
         return false;
     }
+    SDL_SetWindowIcon(app.window, app.icon);
+    SDL_DestroySurface(app.icon);
 
     app.renderer = SDL_CreateRenderer(app.window, NULL);
     if (!app.renderer) {
@@ -27,19 +34,6 @@ bool init(App& app) {
 };
 
 void update(App& app, double deltaTime) {
-    if (!app.ecsTestDone) {
-        Entity e = app.EntityManager.createEntity();
-
-        std::cout << "Entity created: " << e.id << std::endl;
-
-        app.EntityManager.addComponent<PositionComponent>(e, 100.f, 200.f);
-
-        auto* pos = app.EntityManager.getComponent<PositionComponent>(e);
-
-        std::cout << "Position: " << pos->x << ", " << pos->y << std::endl;
-
-        app.ecsTestDone = true;
-    }
     updateCanvas(app.canvas, app.input, app.windowWidth, app.windowHeight, deltaTime);
     updateUILayout(app.ui, app.windowWidth, app.windowHeight);
     updateUIState(app.input, app.ui);

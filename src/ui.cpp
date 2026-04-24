@@ -53,7 +53,6 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight) {
 }
 
 void updateUIState(InputState& input, UI& ui) {
-
     if (input.noteToolPressed) ui.activeTool = NodeType::Note;
     if (input.textToolPressed) ui.activeTool = NodeType::Text;
     if (input.imageToolPressed) ui.activeTool = NodeType::Image;
