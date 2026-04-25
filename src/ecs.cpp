@@ -70,7 +70,7 @@ static Entity createGrid(EntityManager& em, float x, float y) {
 static Entity createLine(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
-    em.addComponent<sizeComponent>(e, 200.0f, 5.0f);
+    em.addComponent<sizeComponent>(e, 200.0f, 15.0f);
     em.addComponent<NodeTypeComponent>(e, NodeType::Line);
     return e;
 }
