@@ -15,7 +15,7 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight) {
     float thickness = (ui.orientation == Orientation::Horizontal) ? ui.baseH * thicknessPercent : ui.baseW * thicknessPercent;
     thickness = std::clamp(thickness, 60.0f, 100.0f);
 
-    if (ui.dock == DockSide::Top || ui.dock == DockSide::Bottom) {
+    if (ui.orientation == Orientation::Horizontal) {
         ui.uiW = length;
         ui.uiH = thickness;
     } else {
@@ -23,12 +23,27 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight) {
         ui.uiH = length;
     }
 
+    float x = 0.0f;
+    float y = 0.0f;
+
     switch (ui.dock) {
-        case DockSide::Top:    ui.uiX = 0.0f; ui.uiY = 0.0f; break;
-        case DockSide::Bottom: ui.uiX = 0.0f; ui.uiY = ui.baseH - ui.uiH; break;
-        case DockSide::Left:   ui.uiX = 0.0f; ui.uiY = 0.0f; break;
-        case DockSide::Right:  ui.uiX = ui.baseW - ui.uiW; ui.uiY = 0.0f; break;
+        case DockSide::Top:    y = 0.0f; break;
+        case DockSide::Bottom: y = ui.baseH - ui.uiH; break;
+        case DockSide::Left:   x = 0.0f; break;
+        case DockSide::Right:  x = ui.baseW - ui.uiW; break;
     }
+
+    if (!ui.isPinned && !ui.isHovered) {
+        switch (ui.dock) {
+            case DockSide::Top:    y = -ui.uiH; break;
+            case DockSide::Bottom: y = ui.baseH; break;
+            case DockSide::Left:   x = -ui.uiW; break;
+            case DockSide::Right:  x = ui.baseW; break;
+        }
+    }
+
+    ui.uiX = x;
+    ui.uiY = y;
 }
 
 void updateToolButtons(UI& ui) {
@@ -66,6 +81,24 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
 
     float dragThreshold = 5.0f;
 
+    // Hover detection for unpinned dock
+    if (!ui.isPinned) {
+        bool edgeHover = false;
+        switch (ui.dock) {
+            case DockSide::Top:    edgeHover = input.mouseY <= 5.0f; break;
+            case DockSide::Bottom: edgeHover = input.mouseY >= ui.baseH - 5.0f; break;
+            case DockSide::Left:   edgeHover = input.mouseX <= 5.0f; break;
+            case DockSide::Right:  edgeHover = input.mouseX >= ui.baseW - 5.0f; break;
+        }
+
+        bool overUI = input.mouseX >= ui.uiX && input.mouseX <= ui.uiX + ui.uiW &&
+                      input.mouseY >= ui.uiY && input.mouseY <= ui.uiY + ui.uiH;
+
+        ui.isHovered = edgeHover || overUI;
+    } else {
+        ui.isHovered = false;
+    }
+
     if (input.leftDown && mouseOverDragZone) {
         ui.isDragging = true;
         ui.dragStarted = false;
@@ -90,7 +123,7 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
     if (ui.isDragging && input.leftReleased) {
         ui.isDragging = false;
         if (!ui.dragStarted && mouseOverDragZone) {
-            ui.isCollapsed = !ui.isCollapsed;
+            ui.isPinned = !ui.isPinned;
         }
 
         float margin = 100.0f;
@@ -101,12 +134,12 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
             else if (input.mouseX > ui.baseW - margin) ui.dock = DockSide::Right;
         }
     }
-    
+
     if (input.dockCollapsePressed) {
-        ui.isCollapsed = !ui.isCollapsed;
+        ui.isPinned = !ui.isPinned;
         input.dockCollapsePressed = false;
     }
-    
+
     for (auto& btn : ui.toolButtons) {
         bool over = input.mouseX >= btn.x && input.mouseX <= btn.x + btn.w &&
                     input.mouseY >= btn.y && input.mouseY <= btn.y + btn.h;
@@ -127,6 +160,9 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
     if (ui.isDraggingTool && input.leftReleased) {
         if (!isMouseOverUI(ui, input.mouseX, input.mouseY)) {
             Vec2 world = screenToWorld(canvas, input.mouseX, input.mouseY);
+            Vec2 size = getNodeBaseSize(ui.draggingToolType);
+            world.x -= size.x * 0.5f;
+            world.y -= size.y * 0.5f;
             createNode(entityManager, ui.draggingToolType, world.x, world.y);
         }
         ui.isDraggingTool = false;

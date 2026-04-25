@@ -88,7 +88,8 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
     float dragSize = 25.0f;
 
     SDL_FRect body;
-    if (ui.isCollapsed) {
+    bool showFull = ui.isPinned || ui.isHovered;
+    if (!showFull) {
         if (ui.orientation == Orientation::Vertical)
             body = { ui.uiX, ui.uiY, ui.uiW, dragSize };
         else
@@ -119,10 +120,9 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
     );
     SDL_RenderFillRect(renderer, &dragZone);
 
-    if (!ui.isCollapsed) {
-        float buttonOffset = ui.orientation == Orientation::Vertical ? dragSize + 10.0f : dragSize + 10.0f;
+    if (showFull) {
         for (const auto& btn : ui.toolButtons) {
-            SDL_FRect rect = { btn.x, btn.y, btn.w, btn.h }; // no extra offset
+            SDL_FRect rect = { btn.x, btn.y, btn.w, btn.h };
             SDL_SetRenderDrawColor(renderer, 160, 160, 160, 255);
             SDL_RenderFillRect(renderer, &rect);
 
@@ -136,12 +136,12 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
     }
 
     if (ui.isDraggingTool) {
-    Vec2 size = getNodeBaseSize(ui.draggingToolType);
-    SDL_FRect ghost;
-    ghost.w = size.x * canvas.zoom;
-    ghost.h = size.y * canvas.zoom;
-    ghost.x = ui.toolDragX - ghost.w / 2.0f;
-    ghost.y = ui.toolDragY - ghost.h / 2.0f;
+        Vec2 size = getNodeBaseSize(ui.draggingToolType);
+        SDL_FRect ghost;
+        ghost.w = size.x * canvas.zoom;
+        ghost.h = size.y * canvas.zoom;
+        ghost.x = ui.toolDragX - ghost.w / 2.0f;
+        ghost.y = ui.toolDragY - ghost.h / 2.0f;
 
         switch (ui.draggingToolType) {
             case NodeType::Note: SDL_SetRenderDrawColor(renderer, 255, 255, 100, 200); break;

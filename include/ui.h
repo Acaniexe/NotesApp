@@ -33,7 +33,8 @@ struct UI {
     DockSide dock = DockSide::Left;
     Orientation orientation = Orientation::Vertical;
 
-    bool isCollapsed = false;
+    bool isPinned = true;
+    bool isHovered = false;
 
     bool isDragging = false;
     bool dragStarted = false;
