@@ -1,6 +1,5 @@
 #include "renderer.h"
 
-// logic to render background
 void beginFrame(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 230, 225, 215, 255);
     SDL_RenderClear(renderer);
@@ -67,76 +66,88 @@ void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas
         rect.h = size->height * canvas.zoom;
 
         switch (type ? type->type : NodeType::Note) {
-            case NodeType::Note:
-                SDL_SetRenderDrawColor(renderer, 255, 255, 100, 255);
-                break;
-
-            case NodeType::Text:
-                SDL_SetRenderDrawColor(renderer, 100, 200, 255, 255);
-                break;
-
-            case NodeType::Image:
-                SDL_SetRenderDrawColor(renderer, 255, 150, 150, 255);
-                break;
-
-            case NodeType::ToDo:
-                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-                break;
-            default:
-                SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-                break;
+            case NodeType::Note: SDL_SetRenderDrawColor(renderer, 255, 255, 100, 255); break;
+            case NodeType::Text: SDL_SetRenderDrawColor(renderer, 100, 200, 255, 255); break;
+            case NodeType::Image: SDL_SetRenderDrawColor(renderer, 255, 150, 150, 255); break;
+            case NodeType::ToDo: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); break;
+            default: SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255); break;
         }
 
         SDL_RenderFillRect(renderer, &rect);
     }
 }
 
-void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input) {
-    SDL_FRect body = {ui.uiX, ui.uiY, ui.uiW, ui.uiH};
-    
-    if (!ui.isCollapsed) {
-        SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
-        SDL_RenderFillRect(renderer, &body);
-    }
+void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, const Canvas& canvas) {
+    float dragSize = 25.0f;
 
-   float dragSize = 25.0f;
-
-    bool hovering = false;
-
-    if (ui.orientation == Orientation::Vertical) {
-        hovering = 
-            input.mouseX >= ui.uiX &&
-            input.mouseX <= ui.uiX + ui.uiW &&
-            input.mouseY >= ui.uiY &&
-            input.mouseY <= ui.uiY + dragSize;
-
-        SDL_SetRenderDrawColor(renderer,
-            hovering ? 90 : 70,
-            hovering ? 90 : 70,
-            hovering ? 90 : 70,
-            255
-        );
-
-        SDL_FRect dragZone = {ui.uiX, ui.uiY, ui.uiW, dragSize};
-        SDL_RenderFillRect(renderer, &dragZone);
+    SDL_FRect body;
+    if (ui.isCollapsed) {
+        if (ui.orientation == Orientation::Vertical)
+            body = { ui.uiX, ui.uiY, ui.uiW, dragSize };
+        else
+            body = { ui.uiX, ui.uiY, dragSize, ui.uiH };
     } else {
-        hovering =
-            input.mouseX >= ui.uiX &&
-            input.mouseX <= ui.uiX + dragSize &&
-            input.mouseY >= ui.uiY &&
-            input.mouseY <= ui.uiY + ui.uiH;
-
-        SDL_SetRenderDrawColor(renderer,
-            hovering ? 90 : 70,
-            hovering ? 90 : 70,
-            hovering ? 90 : 70,
-            255
-        );
-
-        SDL_FRect dragZone = {ui.uiX, ui.uiY, dragSize, ui.uiH};
-        SDL_RenderFillRect(renderer, &dragZone);
+        body = { ui.uiX, ui.uiY, ui.uiW, ui.uiH };
     }
-};
+
+    SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
+    SDL_RenderFillRect(renderer, &body);
+
+    SDL_FRect dragZone;
+    bool hovering = false;
+    if (ui.orientation == Orientation::Vertical) {
+        dragZone = { ui.uiX, ui.uiY, ui.uiW, dragSize };
+        hovering = input.mouseX >= dragZone.x && input.mouseX <= dragZone.x + dragZone.w &&
+                   input.mouseY >= dragZone.y && input.mouseY <= dragZone.y + dragZone.h;
+    } else {
+        dragZone = { ui.uiX, ui.uiY, dragSize, ui.uiH };
+        hovering = input.mouseX >= dragZone.x && input.mouseX <= dragZone.x + dragZone.w &&
+                   input.mouseY >= dragZone.y && input.mouseY <= dragZone.y + dragZone.h;
+    }
+    SDL_SetRenderDrawColor(renderer,
+        hovering ? 90 : 70,
+        hovering ? 90 : 70,
+        hovering ? 90 : 70,
+        255
+    );
+    SDL_RenderFillRect(renderer, &dragZone);
+
+    if (!ui.isCollapsed) {
+        float buttonOffset = ui.orientation == Orientation::Vertical ? dragSize + 10.0f : dragSize + 10.0f;
+        for (const auto& btn : ui.toolButtons) {
+            SDL_FRect rect = { btn.x, btn.y, btn.w, btn.h }; // no extra offset
+            SDL_SetRenderDrawColor(renderer, 160, 160, 160, 255);
+            SDL_RenderFillRect(renderer, &rect);
+
+            bool over = input.mouseX >= rect.x && input.mouseX <= rect.x + rect.w &&
+                        input.mouseY >= rect.y && input.mouseY <= rect.y + rect.h;
+            if (over) {
+                SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+                SDL_RenderRect(renderer, &rect);
+            }
+        }
+    }
+
+    if (ui.isDraggingTool) {
+        SDL_FRect ghost;
+        float nodeBaseW = 200.0f;
+        float nodeBaseH = 150.0f;
+        ghost.w = nodeBaseW * canvas.zoom;
+        ghost.h = nodeBaseH * canvas.zoom;
+        ghost.x = ui.toolDragX - ghost.w / 2.0f;
+        ghost.y = ui.toolDragY - ghost.h / 2.0f;
+
+        switch (ui.draggingToolType) {
+            case NodeType::Note: SDL_SetRenderDrawColor(renderer, 255, 255, 100, 200); break;
+            case NodeType::Text: SDL_SetRenderDrawColor(renderer, 100, 200, 255, 200); break;
+            case NodeType::Image: SDL_SetRenderDrawColor(renderer, 255, 150, 150, 200); break;
+            case NodeType::ToDo: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
+            default: SDL_SetRenderDrawColor(renderer, 200, 200, 200, 200); break;
+        }
+
+        SDL_RenderFillRect(renderer, &ghost);
+    }
+}
 
 void endFrame(SDL_Renderer* renderer) {
     SDL_RenderPresent(renderer);

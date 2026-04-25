@@ -1,6 +1,8 @@
 #pragma once
 #include "ecs.h"
 #include "input.h"
+#include "canvas.h"
+#include <vector>
 
 enum class DockSide {
     Top,
@@ -12,6 +14,11 @@ enum class DockSide {
 enum class Orientation {
     Horizontal,
     Vertical
+};
+
+struct ToolButton {
+    NodeType type;
+    float x, y, w, h;
 };
 
 struct UI {
@@ -37,9 +44,16 @@ struct UI {
     float clickStartX = 0.0f;
     float clickStartY = 0.0f;
 
+    bool isDraggingTool = false;
+    NodeType draggingToolType;
+    float toolDragX = 0.0f;
+    float toolDragY = 0.0f;
+
     NodeType activeTool = NodeType::Note;
+    std::vector<ToolButton> toolButtons;
 };
 
 void updateUILayout(UI& ui, int windowWidth, int windowHeight);
-void updateUIState(InputState& input, UI& ui);
+void updateToolButtons(UI& ui);
+void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager);
 bool isMouseOverUI(const UI& ui, float mx, float my);

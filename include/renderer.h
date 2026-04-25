@@ -9,5 +9,5 @@
 void beginFrame(SDL_Renderer* renderer);
 void renderCanvas(SDL_Renderer* renderer, const Canvas& canvas, int windowWidth, int windowHeight);
 void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas, float windowWidth, float windowHeight);
-void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input);
+void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, const Canvas& canvas);
 void endFrame(SDL_Renderer* renderer);

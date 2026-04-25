@@ -36,15 +36,16 @@ bool init(App& app) {
 void update(App& app, double deltaTime) {
     updateCanvas(app.canvas, app.input, app.windowWidth, app.windowHeight, deltaTime);
     updateUILayout(app.ui, app.windowWidth, app.windowHeight);
-    updateUIState(app.input, app.ui);
-    handleNodeInput(app.input, app.EntityManager, app.ui, app.canvas);
+    updateToolButtons(app.ui);
+    updateUIState(app.input, app.ui, app.canvas, app.EntityManager);
+    //handleNodeInput(app.input, app.EntityManager, app.ui, app.canvas);
 }
 
 void render(App& app) {
     beginFrame(app.renderer);
     renderCanvas(app.renderer, app.canvas, app.windowWidth, app.windowHeight);
     renderNodes(app.renderer, app.EntityManager, app.canvas, app.windowWidth, app.windowHeight);
-    renderUI(app.renderer, app.ui, app.input);
+    renderUI(app.renderer, app.ui, app.input, app.canvas);
     endFrame(app.renderer);
 }
 

@@ -50,7 +50,7 @@ void updateCanvas(Canvas& canvas, const InputState& input, int windowWidth, int 
     canvas.lastMouseY = input.mouseY;
 }
 
-void handleNodeInput(const InputState& input, EntityManager& entityManager, UI& ui, const Canvas& canvas) {
+/*void handleNodeInput(const InputState& input, EntityManager& entityManager, UI& ui, const Canvas& canvas) {
     if (isMouseOverUI(ui, input.mouseX, input.mouseY) || ui.isDragging) return;
 
     if (input.leftDown) {
@@ -63,4 +63,4 @@ void handleNodeInput(const InputState& input, EntityManager& entityManager, UI& 
 
         createNode(entityManager, ui.activeTool, world.x, world.y);
     }
-}
+}*/
