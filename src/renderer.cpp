@@ -70,6 +70,13 @@ void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas
             case NodeType::Text: SDL_SetRenderDrawColor(renderer, 100, 200, 255, 255); break;
             case NodeType::Image: SDL_SetRenderDrawColor(renderer, 255, 150, 150, 255); break;
             case NodeType::ToDo: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); break;
+            case NodeType::Link: SDL_SetRenderDrawColor(renderer, 245, 222, 179, 255); break;
+            case NodeType::Grid: SDL_SetRenderDrawColor(renderer, 152, 251, 152, 255); break;
+            case NodeType::Line: SDL_SetRenderDrawColor(renderer, 30, 144, 255, 255); break;
+            case NodeType::Draw: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
+            case NodeType::Colour: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
+            case NodeType::Comment: SDL_SetRenderDrawColor(renderer, 255, 228, 225, 255); break;
+            case NodeType::Code: SDL_SetRenderDrawColor(renderer, 112, 128, 144, 255); break;
             default: SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255); break;
         }
 
@@ -129,19 +136,25 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
     }
 
     if (ui.isDraggingTool) {
-        SDL_FRect ghost;
-        float nodeBaseW = 200.0f;
-        float nodeBaseH = 150.0f;
-        ghost.w = nodeBaseW * canvas.zoom;
-        ghost.h = nodeBaseH * canvas.zoom;
-        ghost.x = ui.toolDragX - ghost.w / 2.0f;
-        ghost.y = ui.toolDragY - ghost.h / 2.0f;
+    Vec2 size = getNodeBaseSize(ui.draggingToolType);
+    SDL_FRect ghost;
+    ghost.w = size.x * canvas.zoom;
+    ghost.h = size.y * canvas.zoom;
+    ghost.x = ui.toolDragX - ghost.w / 2.0f;
+    ghost.y = ui.toolDragY - ghost.h / 2.0f;
 
         switch (ui.draggingToolType) {
             case NodeType::Note: SDL_SetRenderDrawColor(renderer, 255, 255, 100, 200); break;
             case NodeType::Text: SDL_SetRenderDrawColor(renderer, 100, 200, 255, 200); break;
             case NodeType::Image: SDL_SetRenderDrawColor(renderer, 255, 150, 150, 200); break;
             case NodeType::ToDo: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
+            case NodeType::Link: SDL_SetRenderDrawColor(renderer, 245, 222, 179, 255); break;
+            case NodeType::Grid: SDL_SetRenderDrawColor(renderer, 152, 251, 152, 255); break;
+            case NodeType::Line: SDL_SetRenderDrawColor(renderer, 30, 144, 255, 255); break;
+            case NodeType::Draw: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
+            case NodeType::Colour: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
+            case NodeType::Comment: SDL_SetRenderDrawColor(renderer, 255, 228, 225, 255); break;
+            case NodeType::Code: SDL_SetRenderDrawColor(renderer, 112, 128, 144, 255); break;
             default: SDL_SetRenderDrawColor(renderer, 200, 200, 200, 200); break;
         }
 

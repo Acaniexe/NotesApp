@@ -37,7 +37,11 @@ void updateToolButtons(UI& ui) {
     float offset = padding;
 
     ui.toolButtons.clear();
-    NodeType types[] = { NodeType::Note, NodeType::Text, NodeType::Image, NodeType::ToDo };
+    NodeType types[] = { 
+        NodeType::Note, NodeType::Text, NodeType::Image, NodeType::ToDo, 
+        NodeType::Link, NodeType::Grid, NodeType::Line, NodeType::Draw,
+        NodeType::Colour, NodeType::Comment, NodeType::Code
+    };
 
     float buttonOffset = 25.0f + 10.0f;
 

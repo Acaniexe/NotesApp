@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <typeindex>
 #include <string>
+#include "canvas.h"
 
 // NODE TYPE
 enum class NodeType {
@@ -20,6 +21,23 @@ enum class NodeType {
     Comment,
     Code
 };
+
+inline Vec2 getNodeBaseSize(NodeType type) {
+    switch (type) {
+        case NodeType::Note:    return {200.0f, 150.0f};
+        case NodeType::Text:    return {200.0f, 150.0f};
+        case NodeType::Image:   return {200.0f, 150.0f};
+        case NodeType::ToDo:    return {200.0f, 150.0f};
+        case NodeType::Link:    return {150.0f, 50.0f};
+        case NodeType::Grid:    return {300.0f, 300.0f};
+        case NodeType::Line:    return {200.0f, 5.0f};
+        case NodeType::Draw:    return {300.0f, 200.0f};
+        case NodeType::Colour:  return {100.0f, 100.0f};
+        case NodeType::Comment: return {200.0f, 100.0f};
+        case NodeType::Code:    return {300.0f, 150.0f};
+        default:                return {200.0f, 150.0f};
+    }
+}
 
 struct NodeTypeComponent {
     NodeType type;
