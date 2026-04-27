@@ -16,6 +16,11 @@ struct InputState {
     bool rightReleased = false;
     bool rightHeld = false;
 
+    bool ctrlDown = false;
+    bool ctrlReleased = false;
+    bool ctrlHeld = false;
+    bool prevCtrlHeld = false;
+
     bool dockCollapsePressed = false;
 
     bool noteToolPressed = false;

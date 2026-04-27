@@ -81,7 +81,6 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
 
     float dragThreshold = 5.0f;
 
-    // Hover detection for unpinned dock
     if (!ui.isPinned) {
         bool edgeHover = false;
         switch (ui.dock) {

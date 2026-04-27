@@ -8,12 +8,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 set(SDL_ARCH x86_64-w64-mingw32)
 
-file(GLOB SRC_FILES "src/*.cpp")
+file(GLOB SRC_FILES
+     "src/*.cpp"
+     "systems/*.cpp"
+)
 
 add_executable(app ${SRC_FILES})
 
 # INCLUDE PATHS
 target_include_directories(app PRIVATE
+    ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/SDL3/${SDL_ARCH}/include
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/SDL3_ttf/${SDL_ARCH}/include

@@ -67,6 +67,8 @@ struct stateComponent {
     bool isSelected = false;
     bool isHovered = false;
     bool isDragging = false;
+
+    Vec2 dragOffset;
 };
 
 struct TextComponent {

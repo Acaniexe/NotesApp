@@ -10,6 +10,8 @@ void eventHandler(App& app) {
     app.input.leftReleased = false;
     app.input.rightDown = false;
     app.input.rightReleased = false;
+    app.input.ctrlDown = false;
+    app.input.ctrlReleased = false;
     app.input.zoom = 0.0f;
 
     // logic for QUIT && windowResize
@@ -63,14 +65,6 @@ void eventHandler(App& app) {
                 if (event.key.repeat == 0) {
                     if (event.key.scancode == SDL_SCANCODE_SEMICOLON) {
                         app.input.dockCollapsePressed = true;
-                    } else if (event.key.scancode == SDL_SCANCODE_N) {
-                        app.input.noteToolPressed = true;
-                    } else if (event.key.scancode == SDL_SCANCODE_T) {
-                        app.input.textToolPressed = true;
-                    } else if (event.key.scancode == SDL_SCANCODE_I) {
-                        app.input.imageToolPressed = true;
-                    } else if (event.key.scancode == SDL_SCANCODE_D) {
-                        app.input.todoToolPressed = true;
                     }
                 }
                 break;
@@ -78,19 +72,16 @@ void eventHandler(App& app) {
             case SDL_EVENT_KEY_UP:
                 if (event.key.scancode == SDL_SCANCODE_SEMICOLON) {
                     app.input.dockCollapsePressed = false;
-                } else if (event.key.scancode == SDL_SCANCODE_N) {
-                    app.input.noteToolPressed= false;
-                } else if (event.key.scancode == SDL_SCANCODE_T) {
-                    app.input.textToolPressed = false;
-                } else if (event.key.scancode == SDL_SCANCODE_I) {
-                    app.input.imageToolPressed = false;
-                } else if (event.key.scancode == SDL_SCANCODE_D) {
-                    app.input.todoToolPressed = false;
                 }
                 break;
         }
     }
 
     const bool* keystate = SDL_GetKeyboardState(NULL);
-    //app.input.dockTop = keystate[SDL_SCANCODE_J];
+    app.input.ctrlHeld = keystate[SDL_SCANCODE_LCTRL] || keystate[SDL_SCANCODE_RCTRL];
+
+    app.input.ctrlDown = app.input.ctrlHeld && !app.input.prevCtrlHeld;
+    app.input.ctrlReleased = !app.input.ctrlHeld && app.input.prevCtrlHeld;
+
+    app.input.prevCtrlHeld = app.input.ctrlHeld;
 }

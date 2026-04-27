@@ -20,6 +20,7 @@ static Entity createNote(EntityManager& em, float x, float y) {
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
     em.addComponent<TextComponent>(e, "New note");
     em.addComponent<NodeTypeComponent>(e, NodeType::Note);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -29,6 +30,7 @@ static Entity createText(EntityManager& em, float x, float y) {
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
     em.addComponent<TextComponent>(e, "Text");
     em.addComponent<NodeTypeComponent>(e, NodeType::Text);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -38,6 +40,7 @@ static Entity createImage(EntityManager& em, float x, float y) {
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
     em.addComponent<ImageComponent>(e, "");
     em.addComponent<NodeTypeComponent>(e, NodeType::Image);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -47,6 +50,7 @@ static Entity createToDo(EntityManager& em, float x, float y) {
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
     em.addComponent<TextComponent>(e, "Text");
     em.addComponent<NodeTypeComponent>(e, NodeType::ToDo);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -56,6 +60,7 @@ static Entity createLink(EntityManager& em, float x, float y) {
     em.addComponent<sizeComponent>(e, 150.0f, 50.0f);
     em.addComponent<TextComponent>(e, "Link");
     em.addComponent<NodeTypeComponent>(e, NodeType::Link);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -64,6 +69,7 @@ static Entity createGrid(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 300.0f, 300.0f);
     em.addComponent<NodeTypeComponent>(e, NodeType::Grid);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -72,6 +78,7 @@ static Entity createLine(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 200.0f, 15.0f);
     em.addComponent<NodeTypeComponent>(e, NodeType::Line);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -88,6 +95,7 @@ static Entity createColour(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 100.0f, 100.0f);
     em.addComponent<NodeTypeComponent>(e, NodeType::Colour);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -97,6 +105,7 @@ static Entity createComment(EntityManager& em, float x, float y) {
     em.addComponent<sizeComponent>(e, 200.0f, 100.0f);
     em.addComponent<TextComponent>(e, "Comment");
     em.addComponent<NodeTypeComponent>(e, NodeType::Comment);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
@@ -106,6 +115,7 @@ static Entity createCode(EntityManager& em, float x, float y) {
     em.addComponent<sizeComponent>(e, 300.0f, 150.0f);
     em.addComponent<TextComponent>(e, "Code");
     em.addComponent<NodeTypeComponent>(e, NodeType::Code);
+    em.addComponent<stateComponent>(e);
     return e;
 }
 
