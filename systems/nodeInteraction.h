@@ -4,9 +4,4 @@
 #include "canvas.h"
 #include "ui.h"
 
-void updateNodeInteraction(
-    InputState& input,
-    EntityManager& em,
-    const Canvas& canvas,
-    const UI& ui
-);
+void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& canvas, const UI& ui);

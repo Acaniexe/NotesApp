@@ -21,6 +21,10 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
         if (hovered) clicked = &entity;
     }
 
+    if (input.delPressed) {
+        deleteNode(em);
+    }
+
     if (input.leftDown) {
         if (clicked) {
             auto* clickedState = em.getComponent<stateComponent>(*clicked);

@@ -21,10 +21,7 @@ struct InputState {
     bool ctrlHeld = false;
     bool prevCtrlHeld = false;
 
-    bool dockCollapsePressed = false;
+    bool delPressed = false;
 
-    bool noteToolPressed = false;
-    bool textToolPressed = false;
-    bool imageToolPressed = false;
-    bool todoToolPressed = false;
+    bool dockCollapsePressed = false;
 };

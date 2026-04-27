@@ -94,6 +94,7 @@ struct Entity {
 class EntityManager {
 public:
     Entity createEntity();
+    void removeEntity(const Entity& entity);
 
     template<typename T, typename... Args>
     void addComponent(Entity entity, Args&&... args);
@@ -144,3 +145,4 @@ bool EntityManager::hasComponent(Entity entity) {
 
 // factory
 Entity createNode(EntityManager& em, NodeType type, float x, float y);
+void deleteNode(EntityManager& em);

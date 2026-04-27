@@ -1,5 +1,6 @@
 #include "ecs.h"
 #include <iostream>
+#include <algorithm>
 
 // ENTITY
 Entity EntityManager::createEntity() {
@@ -160,4 +161,34 @@ Entity createNode(EntityManager& em, NodeType type, float x, float y) {
                << " at (" << x << ", " << y << ")\n";
 
     return result;
+}
+
+void EntityManager::removeEntity(const Entity& entity) {
+    entities.erase(
+        std::remove_if(
+            entities.begin(),
+            entities.end(),
+            [&entity](const Entity& e) { return e.id == entity.id; }
+        ),
+        entities.end()
+    );
+
+    componentStorage.erase(entity.id);
+
+    std::cout << "Entity removed: " << entity.id << "\n";
+}
+
+void deleteNode(EntityManager& em) {
+    std::vector<Entity> toDelete;
+
+    for (auto& e : em.getEntities()) {
+        auto* state = em.getComponent<stateComponent>(e);
+        if (state && state->isSelected) {
+            toDelete.push_back(e);
+        }
+    }
+
+    for (auto& e : toDelete) {
+        em.removeEntity(e);
+    }
 }

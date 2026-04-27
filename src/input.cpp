@@ -66,12 +66,18 @@ void eventHandler(App& app) {
                     if (event.key.scancode == SDL_SCANCODE_SEMICOLON) {
                         app.input.dockCollapsePressed = true;
                     }
+                    else if (event.key.scancode == SDL_SCANCODE_DELETE) {
+                        app.input.delPressed = true;
+                    }
                 }
                 break;
 
             case SDL_EVENT_KEY_UP:
                 if (event.key.scancode == SDL_SCANCODE_SEMICOLON) {
                     app.input.dockCollapsePressed = false;
+                }
+                else if (event.key.scancode == SDL_SCANCODE_DELETE) {
+                    app.input.delPressed = false;
                 }
                 break;
         }
