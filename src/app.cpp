@@ -36,9 +36,10 @@ bool init(App& app) {
 
 void update(App& app, double deltaTime) {
     updateCanvas(app.canvas, app.input, app.windowWidth, app.windowHeight, deltaTime);
-    updateUILayout(app.ui, app.windowWidth, app.windowHeight);
+    updateToolbarResize(app.ui, app.input, app.panels);
+    updateUILayout(app.ui, app.windowWidth, app.windowHeight, app.panels);
     updateToolButtons(app.ui);
-    updateUIState(app.input, app.ui, app.canvas, app.EntityManager);
+    updateUIState(app.input, app.ui, app.canvas, app.EntityManager, app.panels);
     updatePanels(app.panels, app.windowWidth, app.windowHeight);
     updatePanelsState(app.panels, app.input, app.windowWidth, app.windowHeight);
     updateNodeInteraction(app.input, app.EntityManager, app.canvas, app.ui);

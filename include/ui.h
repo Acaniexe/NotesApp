@@ -52,6 +52,11 @@ struct UI {
 
     NodeType activeTool = NodeType::Note;
     std::vector<ToolButton> toolButtons;
+
+    float uiThickness = 0.0f;
+    float minThickness = 60.0f;
+    float maxThickness = 150.0f;
+    bool isDraggingThickness = false;
 };
 
 struct Panel {
@@ -65,12 +70,18 @@ struct Panels {
     float split = 0.5f;
     float dividerHeight = 6.0f;
 
+    float panelWidth = 0.0f;
+    float minWidth = 125.0f;
+    float maxWidth = 250.0f;
+
     bool isDraggingDivider = false;
+    bool isDraggingWidth = false;
 };
 
-void updateUILayout(UI& ui, int windowWidth, int windowHeight);
+void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& panels);
 void updateToolButtons(UI& ui);
-void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager);
+void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager, const Panels& panels);
+void updateToolbarResize(UI& ui, InputState& input, const Panels& panels);
 void updatePanels(Panels& panels, int windowWidth, int windowHeight);
 void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int windowHeight);
 bool isMouseOverUI(const UI& ui, float mx, float my);

@@ -1,36 +1,41 @@
 #include "ui.h"
 #include <algorithm>
 
-void updateUILayout(UI& ui, int windowWidth, int windowHeight) {
+void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& panels) {
     ui.baseW = (float)windowWidth;
     ui.baseH = (float)windowHeight;
-
     if (ui.isDragging) return;
 
-    ui.orientation = (ui.dock == DockSide::Top || ui.dock == DockSide::Bottom) ? Orientation::Horizontal : Orientation::Vertical;
+    ui.orientation = (ui.dock == DockSide::Top || ui.dock == DockSide::Bottom)
+                     ? Orientation::Horizontal
+                     : Orientation::Vertical;
 
     float length = (ui.orientation == Orientation::Horizontal) ? ui.baseW : ui.baseH;
 
-    float thicknessPercent = (ui.orientation == Orientation::Horizontal) ? 0.12f : 0.08f; 
-    float thickness = (ui.orientation == Orientation::Horizontal) ? ui.baseH * thicknessPercent : ui.baseW * thicknessPercent;
-    thickness = std::clamp(thickness, 60.0f, 100.0f);
+    if (ui.uiThickness <= 0.0f) {
+        float thicknessPercent = (ui.orientation == Orientation::Horizontal) ? 0.12f : 0.08f;
+        ui.uiThickness = (ui.orientation == Orientation::Horizontal) ? ui.baseH * thicknessPercent : ui.baseW * thicknessPercent;
+        ui.uiThickness = std::clamp(ui.uiThickness, ui.minThickness, ui.maxThickness);
+    }
 
     if (ui.orientation == Orientation::Horizontal) {
         ui.uiW = length;
-        ui.uiH = thickness;
+        ui.uiH = ui.uiThickness;
     } else {
-        ui.uiW = thickness;
+        ui.uiW = ui.uiThickness;
         ui.uiH = length;
     }
 
     float x = 0.0f;
     float y = 0.0f;
 
+    float panelOffset = (ui.dock == DockSide::Right) ? panels.panelWidth : 0.0f;
+
     switch (ui.dock) {
         case DockSide::Top:    y = 0.0f; break;
         case DockSide::Bottom: y = ui.baseH - ui.uiH; break;
         case DockSide::Left:   x = 0.0f; break;
-        case DockSide::Right:  x = ui.baseW - ui.uiW; break;
+        case DockSide::Right:  x = ui.baseW - ui.uiW - panelOffset; break;
     }
 
     if (!ui.isPinned && !ui.isHovered) {
@@ -38,7 +43,7 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight) {
             case DockSide::Top:    y = -ui.uiH; break;
             case DockSide::Bottom: y = ui.baseH; break;
             case DockSide::Left:   x = -ui.uiW; break;
-            case DockSide::Right:  x = ui.baseW; break;
+            case DockSide::Right:  x = ui.baseW - ui.uiW - panelOffset; break;
         }
     }
 
@@ -52,11 +57,10 @@ void updateToolButtons(UI& ui) {
     float offset = padding;
 
     ui.toolButtons.clear();
-    NodeType types[] = { 
-        NodeType::Note, NodeType::Text, NodeType::Image, NodeType::ToDo, 
-        NodeType::Link, NodeType::Grid, NodeType::Line, NodeType::Draw,
-        NodeType::Colour, NodeType::Comment, NodeType::Code
-    };
+
+    NodeType types[] = { NodeType::Note, NodeType::Text, NodeType::Image, NodeType::ToDo, NodeType::Link,
+                         NodeType::Grid, NodeType::Line, NodeType::Draw, NodeType::Colour,
+                         NodeType::Comment, NodeType::Code };
 
     float buttonOffset = 25.0f + 10.0f;
 
@@ -71,9 +75,56 @@ void updateToolButtons(UI& ui) {
     }
 }
 
-void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager) {
+void updateToolbarResize(UI& ui, InputState& input, const Panels& panels) {
+    float handleSize = 6.0f;
+
+    float panelOffset = (ui.dock == DockSide::Right) ? panels.panelWidth : 0.0f;
+
+    bool overHandle = false;
+
+    if (ui.orientation == Orientation::Horizontal) {
+        overHandle = input.mouseY >= ui.uiY + ui.uiH - handleSize &&
+                     input.mouseY <= ui.uiY + ui.uiH + handleSize &&
+                     input.mouseX >= ui.uiX &&
+                     input.mouseX <= ui.uiX + ui.uiW;
+    } else {
+        if (ui.dock == DockSide::Left) {
+            overHandle = input.mouseX >= ui.uiX + ui.uiW - handleSize &&
+                         input.mouseX <= ui.uiX + ui.uiW + handleSize &&
+                         input.mouseY >= ui.uiY &&
+                         input.mouseY <= ui.uiY + ui.uiH;
+        } else if (ui.dock == DockSide::Right) {
+            overHandle = input.mouseX >= ui.uiX - handleSize &&
+                         input.mouseX <= ui.uiX + handleSize &&
+                         input.mouseY >= ui.uiY &&
+                         input.mouseY <= ui.uiY + ui.uiH;
+        }
+    }
+
+    if (input.leftDown && overHandle) {
+        ui.isDraggingThickness = true;
+    }
+
+    if (ui.isDraggingThickness && input.leftHeld) {
+        if (ui.orientation == Orientation::Horizontal) {
+            ui.uiThickness = std::clamp(input.mouseY - ui.uiY, ui.minThickness, ui.maxThickness);
+        } else {
+            if (ui.dock == DockSide::Left) {
+                ui.uiThickness = std::clamp(input.mouseX - ui.uiX, ui.minThickness, ui.maxThickness);
+            } else if (ui.dock == DockSide::Right) {
+                ui.uiThickness = std::clamp(ui.baseW - input.mouseX - panelOffset, ui.minThickness, ui.maxThickness);
+            }
+        }
+    }
+
+    if (input.leftReleased) {
+        ui.isDraggingThickness = false;
+    }
+}
+
+void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager, const Panels& panels) {
     float dragSize = 25.0f;
-    bool mouseOverDragZone = (ui.orientation == Orientation::Vertical) ?
+    bool mouseOverDragZone = (ui.orientation == Orientation::Vertical) ? 
         (input.mouseX >= ui.uiX && input.mouseX <= ui.uiX + ui.uiW &&
          input.mouseY >= ui.uiY && input.mouseY <= ui.uiY + dragSize) :
         (input.mouseX >= ui.uiX && input.mouseX <= ui.uiX + dragSize &&
@@ -89,10 +140,8 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
             case DockSide::Left:   edgeHover = input.mouseX <= 5.0f; break;
             case DockSide::Right:  edgeHover = input.mouseX >= ui.baseW - 5.0f; break;
         }
-
         bool overUI = input.mouseX >= ui.uiX && input.mouseX <= ui.uiX + ui.uiW &&
                       input.mouseY >= ui.uiY && input.mouseY <= ui.uiY + ui.uiH;
-
         ui.isHovered = edgeHover || overUI;
     } else {
         ui.isHovered = false;
@@ -130,8 +179,9 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
             if (input.mouseY < margin) ui.dock = DockSide::Top;
             else if (input.mouseY > ui.baseH - margin) ui.dock = DockSide::Bottom;
             else if (input.mouseX < margin) ui.dock = DockSide::Left;
-            else if (input.mouseX > ui.baseW - margin) ui.dock = DockSide::Right;
-        }
+            else if (input.mouseX > ui.baseW - panels.panelWidth - (ui.uiW * 0.5f))
+                ui.dock = DockSide::Right;
+}
     }
 
     if (input.dockCollapsePressed) {
@@ -169,26 +219,26 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
 }
 
 bool isMouseOverUI(const UI& ui, float mx, float my) {
-    return mx >= ui.uiX &&
-           mx <= ui.uiX + ui.uiW &&
-           my >= ui.uiY &&
-           my <= ui.uiY + ui.uiH;
+    return mx >= ui.uiX && mx <= ui.uiX + ui.uiW &&
+           my >= ui.uiY && my <= ui.uiY + ui.uiH;
 }
 
 void updatePanels(Panels& panels, int windowWidth, int windowHeight) {
     float baseW = (float)windowWidth;
     float baseH = (float)windowHeight;
 
-    float widthPercentage = 0.15f;
-    float panelWidth = std::clamp(baseW * widthPercentage, 125.0f, 250.0f);
-    
-    float divider = panels.dividerHeight;
+    float panelWidth = panels.panelWidth;
+    if (panelWidth <= 0.0f) {
+        panelWidth = std::clamp(baseW * 0.15f, panels.minWidth, panels.maxWidth);
+        panels.panelWidth = panelWidth;
+    }
 
+    float divider = panels.dividerHeight;
     float usableHeight = baseH - divider;
     float topHeight = usableHeight * panels.split;
     float bottomHeight = usableHeight * (1.0f - panels.split);
-    float x = baseW - panelWidth;
 
+    float x = baseW - panelWidth;
     panels.top.x = x;
     panels.top.y = 0.0f;
     panels.top.w = panelWidth;
@@ -202,30 +252,39 @@ void updatePanels(Panels& panels, int windowWidth, int windowHeight) {
 
 void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int windowHeight) {
     float baseW = (float)windowWidth;
-
-    float panelWidth = std::clamp(baseW * 0.15f, 125.0f, 250.0f);
-    float x = baseW - panelWidth;
-
+    float panelX = baseW - panels.panelWidth;
     float dividerY = panels.top.y + panels.top.h;
 
-    bool overDivider = 
-        input.mouseX >= x &&
-        input.mouseX <= x + panelWidth &&
-        input.mouseY >= dividerY &&
-        input.mouseY <= dividerY + panels.dividerHeight;
+    float handleSize = 6.0f;
 
+    bool overDivider = input.mouseX >= panelX && input.mouseX <= panelX + panels.panelWidth &&
+                       input.mouseY >= dividerY && input.mouseY <= dividerY + panels.dividerHeight;
     if (input.leftDown && overDivider) {
         panels.isDraggingDivider = true;
     }
 
     if (panels.isDraggingDivider && input.leftHeld) {
-        float mouseY = input.mouseY;
-
-        float newSplit = mouseY / (float)windowHeight;
+        float usableHeight = (float)windowHeight - panels.dividerHeight;
+        float newSplit = input.mouseY / usableHeight;
         panels.split = std::clamp(newSplit, 0.1f, 0.9f);
     }
 
     if (input.leftReleased) {
         panels.isDraggingDivider = false;
+    }
+
+    bool overWidthHandle = input.mouseX >= panelX - handleSize && input.mouseX <= panelX + handleSize &&
+                           input.mouseY >= 0.0f && input.mouseY <= (float)windowHeight;
+    if (input.leftDown && overWidthHandle) {
+        panels.isDraggingWidth = true;
+    }
+
+    if (panels.isDraggingWidth && input.leftHeld) {
+        float newWidth = baseW - input.mouseX;
+        panels.panelWidth = std::clamp(newWidth, panels.minWidth, panels.maxWidth);
+    }
+
+    if (input.leftReleased) {
+        panels.isDraggingWidth = false;
     }
 }
