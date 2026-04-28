@@ -177,6 +177,20 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
     }
 }
 
+void renderPanels(SDL_Renderer* renderer, const Panels& panels) {
+    SDL_FRect top = { panels.top.x, panels.top.y, panels.top.w, panels.top.h };
+    SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
+    SDL_RenderFillRect(renderer, &top);
+
+    SDL_FRect bottom = { panels.bottom.x, panels.bottom.y, panels.bottom.w, panels.bottom.h };
+    SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
+    SDL_RenderFillRect(renderer, &bottom);
+
+    SDL_FRect divider = { panels.top.x, panels.top.y + panels.top.h, panels.top.w, panels.dividerHeight };
+    SDL_SetRenderDrawColor(renderer, 110, 110,110, 255);
+    SDL_RenderFillRect(renderer, &divider);
+}
+
 void endFrame(SDL_Renderer* renderer) {
     SDL_RenderPresent(renderer);
 }

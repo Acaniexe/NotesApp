@@ -174,3 +174,58 @@ bool isMouseOverUI(const UI& ui, float mx, float my) {
            my >= ui.uiY &&
            my <= ui.uiY + ui.uiH;
 }
+
+void updatePanels(Panels& panels, int windowWidth, int windowHeight) {
+    float baseW = (float)windowWidth;
+    float baseH = (float)windowHeight;
+
+    float widthPercentage = 0.15f;
+    float panelWidth = std::clamp(baseW * widthPercentage, 125.0f, 250.0f);
+    
+    float divider = panels.dividerHeight;
+
+    float usableHeight = baseH - divider;
+    float topHeight = usableHeight * panels.split;
+    float bottomHeight = usableHeight * (1.0f - panels.split);
+    float x = baseW - panelWidth;
+
+    panels.top.x = x;
+    panels.top.y = 0.0f;
+    panels.top.w = panelWidth;
+    panels.top.h = topHeight;
+
+    panels.bottom.x = x;
+    panels.bottom.y = topHeight + divider;
+    panels.bottom.w = panelWidth;
+    panels.bottom.h = bottomHeight;
+}
+
+void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int windowHeight) {
+    float baseW = (float)windowWidth;
+
+    float panelWidth = std::clamp(baseW * 0.15f, 125.0f, 250.0f);
+    float x = baseW - panelWidth;
+
+    float dividerY = panels.top.y + panels.top.h;
+
+    bool overDivider = 
+        input.mouseX >= x &&
+        input.mouseX <= x + panelWidth &&
+        input.mouseY >= dividerY &&
+        input.mouseY <= dividerY + panels.dividerHeight;
+
+    if (input.leftDown && overDivider) {
+        panels.isDraggingDivider = true;
+    }
+
+    if (panels.isDraggingDivider && input.leftHeld) {
+        float mouseY = input.mouseY;
+
+        float newSplit = mouseY / (float)windowHeight;
+        panels.split = std::clamp(newSplit, 0.1f, 0.9f);
+    }
+
+    if (input.leftReleased) {
+        panels.isDraggingDivider = false;
+    }
+}

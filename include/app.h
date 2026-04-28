@@ -18,6 +18,7 @@ struct App {
     InputState input;
     Canvas canvas;
     UI ui;
+    Panels panels;
     EntityManager EntityManager;
 };
 

@@ -39,6 +39,8 @@ void update(App& app, double deltaTime) {
     updateUILayout(app.ui, app.windowWidth, app.windowHeight);
     updateToolButtons(app.ui);
     updateUIState(app.input, app.ui, app.canvas, app.EntityManager);
+    updatePanels(app.panels, app.windowWidth, app.windowHeight);
+    updatePanelsState(app.panels, app.input, app.windowWidth, app.windowHeight);
     updateNodeInteraction(app.input, app.EntityManager, app.canvas, app.ui);
 }
 
@@ -47,6 +49,7 @@ void render(App& app) {
     renderCanvas(app.renderer, app.canvas, app.windowWidth, app.windowHeight);
     renderNodes(app.renderer, app.EntityManager, app.canvas, app.windowWidth, app.windowHeight);
     renderUI(app.renderer, app.ui, app.input, app.canvas);
+    renderPanels(app.renderer, app.panels);
     endFrame(app.renderer);
 }
 

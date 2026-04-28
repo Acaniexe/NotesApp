@@ -54,7 +54,23 @@ struct UI {
     std::vector<ToolButton> toolButtons;
 };
 
+struct Panel {
+    float x, y, w, h;
+};
+
+struct Panels {
+    Panel top;
+    Panel bottom;
+
+    float split = 0.5f;
+    float dividerHeight = 6.0f;
+
+    bool isDraggingDivider = false;
+};
+
 void updateUILayout(UI& ui, int windowWidth, int windowHeight);
 void updateToolButtons(UI& ui);
 void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager);
+void updatePanels(Panels& panels, int windowWidth, int windowHeight);
+void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int windowHeight);
 bool isMouseOverUI(const UI& ui, float mx, float my);
