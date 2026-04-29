@@ -3,7 +3,7 @@
 #include "systems/nodeInteraction.h"
 #include <iostream>
 
-// logic to initialise SDL && create window + renderer
+//Initialise SDL, Window, Renderer and Icon
 bool init(App& app) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cout << "SDL failed: " << SDL_GetError() << std::endl;
@@ -34,17 +34,19 @@ bool init(App& app) {
     return true;
 };
 
+//Handles update loop
 void update(App& app, double deltaTime) {
     updateCanvas(app.canvas, app.input, app.windowWidth, app.windowHeight, deltaTime);
-    updateToolbarResize(app.ui, app.input, app.panels);
-    updateUILayout(app.ui, app.windowWidth, app.windowHeight, app.panels);
-    updateToolButtons(app.ui);
+    updatePanelsState(app.panels, app.input, app.windowWidth, app.windowHeight);
     updateUIState(app.input, app.ui, app.canvas, app.EntityManager, app.panels);
     updatePanels(app.panels, app.windowWidth, app.windowHeight);
-    updatePanelsState(app.panels, app.input, app.windowWidth, app.windowHeight);
+    updateUILayout(app.ui, app.windowWidth, app.windowHeight, app.panels);
+    updateToolButtons(app.ui);
+    updateToolbarResize(app.ui, app.input, app.panels);
     updateNodeInteraction(app.input, app.EntityManager, app.canvas, app.ui);
 }
 
+//Handles render loop
 void render(App& app) {
     beginFrame(app.renderer);
     renderCanvas(app.renderer, app.canvas, app.windowWidth, app.windowHeight);
@@ -54,6 +56,7 @@ void render(App& app) {
     endFrame(app.renderer);
 }
 
+//Handles clean up
 void cleanUp(App& app) {
     SDL_DestroyRenderer(app.renderer);
     SDL_DestroyWindow(app.window);

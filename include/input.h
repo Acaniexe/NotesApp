@@ -1,5 +1,6 @@
 #pragma once
 
+//Input states
 struct InputState {
     bool windowResized = false;
 

@@ -4,6 +4,7 @@
 #include "canvas.h"
 #include <vector>
 
+//Docking sids for UI toolbar
 enum class DockSide {
     Top,
     Bottom,
@@ -11,31 +12,39 @@ enum class DockSide {
     Right
 };
 
+//Layout Orientation for UI toolbar
 enum class Orientation {
     Horizontal,
     Vertical
 };
 
+//Tool Button in toolbar
 struct ToolButton {
     NodeType type;
     float x, y, w, h;
 };
 
+//Main toolbar state
 struct UI {
+    //Window reference size
     float baseW = 0.0f;
     float baseH = 0.0f;
 
+    //UI toolbar rectangle size
     float uiX = 0.0f;
     float uiY = 0.0f;
     float uiW = 0.0f;
     float uiH = 0.0f;
 
+    //Handles Docking and Orientation
     DockSide dock = DockSide::Left;
     Orientation orientation = Orientation::Vertical;
 
+    //Pin/Unpin states
     bool isPinned = true;
     bool isHovered = false;
 
+    //Dragging states
     bool isDragging = false;
     bool dragStarted = false;
 
@@ -45,6 +54,7 @@ struct UI {
     float clickStartX = 0.0f;
     float clickStartY = 0.0f;
 
+    //Tool Dragging 
     bool isDraggingTool = false;
     NodeType draggingToolType;
     float toolDragX = 0.0f;
@@ -53,16 +63,19 @@ struct UI {
     NodeType activeTool = NodeType::Note;
     std::vector<ToolButton> toolButtons;
 
+    //Toolbar thickness for resize
     float uiThickness = 0.0f;
     float minThickness = 60.0f;
     float maxThickness = 150.0f;
     bool isDraggingThickness = false;
 };
 
+//Panel state
 struct Panel {
     float x, y, w, h;
 };
 
+//Panels state
 struct Panels {
     Panel top;
     Panel bottom;
@@ -78,6 +91,7 @@ struct Panels {
     bool isDraggingWidth = false;
 };
 
+//UI functions
 void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& panels);
 void updateToolButtons(UI& ui);
 void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager, const Panels& panels);

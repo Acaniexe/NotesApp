@@ -1,16 +1,18 @@
 #include "renderer.h"
 
+//Clears the screen at start of each frame
 void beginFrame(SDL_Renderer* renderer) {
-    SDL_SetRenderDrawColor(renderer, 230, 225, 215, 255);
+    SDL_SetRenderDrawColor(renderer, 230, 225, 215, 255); //Light background
     SDL_RenderClear(renderer);
 }
 
+//Renders the grid dots for canvas background
 void renderCanvas(SDL_Renderer* renderer, const Canvas& canvas, int windowWidth, int windowHeight) {
 
-    float alpha = SDL_clamp(canvas.zoom * 0.5f, 0.15f, 0.5f);
+    float alpha = SDL_clamp(canvas.zoom * 0.5f, 0.15f, 0.5f); //Fades grid at low zoom
     SDL_SetRenderDrawColor(renderer, 50, 50, 50, (Uint8)(alpha * 255));
 
-    float spacing = 100.0f;
+    const float spacing = 100.0f; //Grid spacing
 
     float left = canvas.cameraX;
     float right = canvas.cameraX + (windowWidth / canvas.zoom);
@@ -20,6 +22,7 @@ void renderCanvas(SDL_Renderer* renderer, const Canvas& canvas, int windowWidth,
     float startX = floorf(left / spacing) * spacing;
     float startY = floorf(top / spacing) * spacing;
 
+    //Draws grid dots
     for (float x = startX; x < right; x += spacing) {
         for (float y = startY; y < bottom; y += spacing) {
 
@@ -35,8 +38,9 @@ void renderCanvas(SDL_Renderer* renderer, const Canvas& canvas, int windowWidth,
     }
 }
 
+//Renders nodes on canvas
 void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas, float windowWidth, float windowHeight) {
-    float margin = 200.0f;
+    const float margin = 200.0f; //Extra margin for smooth visibility on camera move
 
     float left = canvas.cameraX - margin;
     float top = canvas.cameraY - margin;
@@ -53,10 +57,10 @@ void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas
 
         if (!pos || !size) continue;
 
-        float nodeRight = pos->x + size->width;
-        float nodeBottom = pos->y + size->height;
-
-        if (nodeRight < left || pos->x > right || nodeBottom < top || pos->y > bottom) continue;
+        //Skips nodes outside view
+        if (pos->x + size->width < left || pos->x > right || 
+            pos->y + size->height < top || pos->y > bottom) 
+            continue;
 
         Vec2 screen = worldToScreen(canvas, pos->x, pos->y);
 
@@ -66,6 +70,7 @@ void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas
         rect.w = size->width * canvas.zoom;
         rect.h = size->height * canvas.zoom;
 
+        //Base colour by node type
         switch (type ? type->type : NodeType::Note) {
             case NodeType::Note: SDL_SetRenderDrawColor(renderer, 255, 255, 100, 255); break;
             case NodeType::Text: SDL_SetRenderDrawColor(renderer, 100, 200, 255, 255); break;
@@ -81,6 +86,7 @@ void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas
             default: SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255); break;
         }
 
+        //Override for hovered or selected state
         if (state && state->isSelected) {
             SDL_SetRenderDrawColor(renderer, 255, 200, 0, 255);
         }
@@ -92,9 +98,11 @@ void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas
     }
 }
 
+//Renders the UI bar and tool buttons
 void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, const Canvas& canvas) {
     float dragSize = 25.0f;
 
+    //UI body
     SDL_FRect body;
     bool showFull = ui.isPinned || ui.isHovered;
     if (!showFull) {
@@ -109,6 +117,7 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
     SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
     SDL_RenderFillRect(renderer, &body);
 
+    //Drag handle
     SDL_FRect dragZone;
     bool hovering = false;
     if (ui.orientation == Orientation::Vertical) {
@@ -128,6 +137,7 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
     );
     SDL_RenderFillRect(renderer, &dragZone);
 
+    //render tool buttons if UI fully visible
     if (showFull) {
         for (const auto& btn : ui.toolButtons) {
             SDL_FRect rect = { btn.x, btn.y, btn.w, btn.h };
@@ -143,6 +153,7 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
         }
     }
 
+    //Render ghost node outline when dragging tool
     if (ui.isDraggingTool) {
         Vec2 size;
         if (ui.draggingToolType == NodeType::Line) {
@@ -177,6 +188,7 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
     }
 }
 
+//Renders the side panels
 void renderPanels(SDL_Renderer* renderer, const Panels& panels) {
     SDL_FRect top = { panels.top.x, panels.top.y, panels.top.w, panels.top.h };
     SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
@@ -191,6 +203,7 @@ void renderPanels(SDL_Renderer* renderer, const Panels& panels) {
     SDL_RenderFillRect(renderer, &divider);
 }
 
+//Presents the rendered frame to screen
 void endFrame(SDL_Renderer* renderer) {
     SDL_RenderPresent(renderer);
 }

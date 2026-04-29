@@ -2,7 +2,7 @@
 #include <iostream>
 #include <algorithm>
 
-// ENTITY
+//Create entity
 Entity EntityManager::createEntity() {
     Entity e;
     e.id = nextEntityId++;
@@ -10,11 +10,13 @@ Entity EntityManager::createEntity() {
     return e;
 }
 
+//Stores entities
 std::vector<Entity> EntityManager::getEntities() const {
     return entities;
 }
 
-// NODE FACTORIES
+//NODE BLUEPRINTS
+//Node Note
 static Entity createNote(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -25,6 +27,7 @@ static Entity createNote(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Text
 static Entity createText(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -35,6 +38,7 @@ static Entity createText(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Image
 static Entity createImage(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -45,6 +49,7 @@ static Entity createImage(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node ToDo
 static Entity createToDo(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -55,6 +60,7 @@ static Entity createToDo(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Link
 static Entity createLink(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -65,6 +71,7 @@ static Entity createLink(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Grid
 static Entity createGrid(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -74,6 +81,7 @@ static Entity createGrid(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Line
 static Entity createLine(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -83,6 +91,7 @@ static Entity createLine(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Draw
 static Entity createDraw(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -91,6 +100,7 @@ static Entity createDraw(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Colour
 static Entity createColour(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -100,6 +110,7 @@ static Entity createColour(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Comment
 static Entity createComment(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -110,6 +121,7 @@ static Entity createComment(EntityManager& em, float x, float y) {
     return e;
 }
 
+//Node Code
 static Entity createCode(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -120,7 +132,7 @@ static Entity createCode(EntityManager& em, float x, float y) {
     return e;
 }
 
-// PUBLIC ENTRY
+//Node type to string
 const char* nodeTypeToString(NodeType type) {
     switch (type) {
         case NodeType::Note:    return "Note";
@@ -138,6 +150,7 @@ const char* nodeTypeToString(NodeType type) {
     }
 }
 
+//Create node function
 Entity createNode(EntityManager& em, NodeType type, float x, float y) {
     Entity result;
 
@@ -163,6 +176,7 @@ Entity createNode(EntityManager& em, NodeType type, float x, float y) {
     return result;
 }
 
+//Handles deletion of nodes
 void EntityManager::removeEntity(const Entity& entity) {
     entities.erase(
         std::remove_if(

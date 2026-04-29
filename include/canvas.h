@@ -2,10 +2,11 @@
 #include "SDL3/SDL.h"
 #include "input.h"
 
+//EntityManager + UI reference 
 class EntityManager;
-
 struct UI;
 
+//Canvas state
 struct Canvas {
     float cameraX = 0.0f;
     float cameraY = 0.0f;
@@ -21,7 +22,7 @@ struct Vec2 {
     float y = 0.0f;
 };
 
+//Canvas functions
 Vec2 screenToWorld(const Canvas& canvas, float sx, float sy);
 Vec2 worldToScreen(const Canvas& canvas, float wx, float wy);
 void updateCanvas(Canvas& canvas, const InputState& input, int windowWidth, int windowHeight, double deltaTime);
-void handleNodeInput(const InputState& input, EntityManager& entityManager, UI& ui, const Canvas& canvas);

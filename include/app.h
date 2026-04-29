@@ -6,15 +6,18 @@
 #include "ui.h"
 #include "ecs.h"
 
+//App state
 struct App {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
     SDL_Surface* icon = nullptr;
 
+    //Window state
     int windowWidth = 900;
     int windowHeight = 500;
     bool running = true;
 
+    //App. References
     InputState input;
     Canvas canvas;
     UI ui;
@@ -22,6 +25,7 @@ struct App {
     EntityManager EntityManager;
 };
 
+//App functions
 bool init(App& app);
 void eventHandler(App& app);
 void update(App& app, double deltaTime);

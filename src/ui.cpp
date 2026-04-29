@@ -1,21 +1,25 @@
 #include "ui.h"
 #include <algorithm>
 
+//Updates UI Layout based on window size, dock position and panels
 void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& panels) {
     ui.baseW = (float)windowWidth;
     ui.baseH = (float)windowHeight;
-    if (ui.isDragging) return;
+    if (ui.isDragging) return; //Skips layout update while dragging
 
+    //determines orientation based on dock side
     ui.orientation = (ui.dock == DockSide::Top || ui.dock == DockSide::Bottom) ? Orientation::Horizontal : Orientation::Vertical;
 
     float length = (ui.orientation == Orientation::Horizontal) ? ui.baseW : ui.baseH;
 
+    //Sets initial thickness
     if (ui.uiThickness <= 0.0f) {
         float thicknessPercent = (ui.orientation == Orientation::Horizontal) ? 0.12f : 0.08f;
         ui.uiThickness = (ui.orientation == Orientation::Horizontal) ? ui.baseH * thicknessPercent : ui.baseW * thicknessPercent;
         ui.uiThickness = std::clamp(ui.uiThickness, ui.minThickness, ui.maxThickness);
     }
 
+    //Assigns width and height based on orientation
     if (ui.orientation == Orientation::Horizontal) {
         ui.uiW = length;
         ui.uiH = ui.uiThickness;
@@ -29,6 +33,7 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& pan
 
     float panelOffset = (ui.dock == DockSide::Right) ? panels.panelWidth : 0.0f;
 
+    //Position UI based on dock side
     switch (ui.dock) {
         case DockSide::Top:    y = 0.0f; break;
         case DockSide::Bottom: y = ui.baseH - ui.uiH; break;
@@ -36,6 +41,7 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& pan
         case DockSide::Right:  x = ui.baseW - ui.uiW - panelOffset; break;
     }
 
+    //Retracts UI if unpinned and not hovered
     if (!ui.isPinned && !ui.isHovered) {
         switch (ui.dock) {
             case DockSide::Top:    y = -ui.uiH; break;
@@ -49,6 +55,7 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& pan
     ui.uiY = y;
 }
 
+//Updates positions and sized of tool buttons
 void updateToolButtons(UI& ui) {
     float padding = 10.0f;
     float buttonSize = 40.0f;
@@ -60,7 +67,7 @@ void updateToolButtons(UI& ui) {
                          NodeType::Grid, NodeType::Line, NodeType::Draw, NodeType::Colour,
                          NodeType::Comment, NodeType::Code };
 
-    float buttonOffset = 25.0f + 10.0f;
+    float buttonOffset = 25.0f + 10.0f; //Visual spacing offset
 
     for (NodeType t : types) {
         if (ui.orientation == Orientation::Vertical) {
@@ -73,6 +80,7 @@ void updateToolButtons(UI& ui) {
     }
 }
 
+//Handles resizing of the toolbar via dragging edge
 void updateToolbarResize(UI& ui, InputState& input, const Panels& panels) {
     float handleSize = 6.0f;
 
@@ -80,6 +88,7 @@ void updateToolbarResize(UI& ui, InputState& input, const Panels& panels) {
 
     bool overHandle = false;
 
+    //Determines which edge is draggable depending on orientation 
     if (ui.orientation == Orientation::Horizontal) {
         overHandle = input.mouseY >= ui.uiY + ui.uiH - handleSize &&
                      input.mouseY <= ui.uiY + ui.uiH + handleSize &&
@@ -103,6 +112,7 @@ void updateToolbarResize(UI& ui, InputState& input, const Panels& panels) {
         ui.isDraggingThickness = true;
     }
 
+    //Updates thickness based on drag and clamps 
     if (ui.isDraggingThickness && input.leftHeld) {
         if (ui.orientation == Orientation::Horizontal) {
             ui.uiThickness = std::clamp(input.mouseY - ui.uiY, ui.minThickness, ui.maxThickness);
@@ -120,6 +130,7 @@ void updateToolbarResize(UI& ui, InputState& input, const Panels& panels) {
     }
 }
 
+//Updates UI state: dragging, hovering, tool interactions, pin/unpin, docking
 void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager, const Panels& panels) {
     float dragSize = 25.0f;
     bool mouseOverDragZone = (ui.orientation == Orientation::Vertical) ? 
@@ -130,6 +141,7 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
 
     float dragThreshold = 5.0f;
 
+    //Updates hover state for auto-hide UI
     if (!ui.isPinned) {
         bool edgeHover = false;
 
@@ -157,6 +169,7 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
         ui.isHovered = false;
     }
 
+    //Starts dragging UI
     if (input.leftDown && mouseOverDragZone) {
         ui.isDragging = true;
         ui.dragStarted = false;
@@ -166,6 +179,7 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
         ui.clickStartY = input.mouseY;
     }
 
+    //Handles dragging movement
     if (ui.isDragging && input.leftHeld) {
         float dx = input.mouseX - ui.clickStartX;
         float dy = input.mouseY - ui.clickStartY;
@@ -178,6 +192,7 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
         }
     }
 
+    //Handles drag release: pin/unpin or dock
     if (ui.isDragging && input.leftReleased) {
         ui.isDragging = false;
         if (!ui.dragStarted && mouseOverDragZone) {
@@ -194,11 +209,13 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
 }
     }
 
+    //Handles pin state
     if (input.dockCollapsePressed) {
         ui.isPinned = !ui.isPinned;
         input.dockCollapsePressed = false;
     }
 
+    //Handles tool button dragging
     for (auto& btn : ui.toolButtons) {
         bool over = input.mouseX >= btn.x && input.mouseX <= btn.x + btn.w &&
                     input.mouseY >= btn.y && input.mouseY <= btn.y + btn.h;
@@ -216,6 +233,7 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
         ui.toolDragY = input.mouseY;
     }
 
+    //Places tool in canvas if released outside UI
     if (ui.isDraggingTool && input.leftReleased) {
         if (!isMouseOverUI(ui, input.mouseX, input.mouseY)) {
             Vec2 world = screenToWorld(canvas, input.mouseX, input.mouseY);
@@ -227,12 +245,13 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
         ui.isDraggingTool = false;
     }
 }
-
+//Return true if mouse is over the UI
 bool isMouseOverUI(const UI& ui, float mx, float my) {
     return mx >= ui.uiX && mx <= ui.uiX + ui.uiW &&
            my >= ui.uiY && my <= ui.uiY + ui.uiH;
 }
 
+//Updates panel sizes and positions based on window 
 void updatePanels(Panels& panels, int windowWidth, int windowHeight) {
     float baseW = (float)windowWidth;
     float baseH = (float)windowHeight;
@@ -260,6 +279,7 @@ void updatePanels(Panels& panels, int windowWidth, int windowHeight) {
     panels.bottom.h = bottomHeight;
 }
 
+//Handles panel state: dragging divider and resize panel width
 void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int windowHeight) {
     float baseW = (float)windowWidth;
     float panelX = baseW - panels.panelWidth;
@@ -267,6 +287,7 @@ void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int w
 
     float handleSize = 6.0f;
 
+    //Dragging vertical divider
     bool overDivider = input.mouseX >= panelX && input.mouseX <= panelX + panels.panelWidth &&
                        input.mouseY >= dividerY && input.mouseY <= dividerY + panels.dividerHeight;
     if (input.leftDown && overDivider) {
@@ -283,6 +304,7 @@ void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int w
         panels.isDraggingDivider = false;
     }
 
+    //Dragging panel width handle
     bool overWidthHandle = input.mouseX >= panelX - handleSize && input.mouseX <= panelX + handleSize &&
                            input.mouseY >= 0.0f && input.mouseY <= (float)windowHeight;
     if (input.leftDown && overWidthHandle) {

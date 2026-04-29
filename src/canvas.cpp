@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 
+//Screen space -> World space conversion
 Vec2 screenToWorld(const Canvas& canvas, float sx, float sy) {
     return {
         canvas.cameraX + sx / canvas.zoom,
@@ -11,6 +12,7 @@ Vec2 screenToWorld(const Canvas& canvas, float sx, float sy) {
     };
 }
 
+//World space -> Screen space conversion
 Vec2 worldToScreen(const Canvas& canvas, float wx, float wy) {
     return {
         (wx - canvas.cameraX) * canvas.zoom,
@@ -18,6 +20,7 @@ Vec2 worldToScreen(const Canvas& canvas, float wx, float wy) {
     };
 }
 
+//Canvas camera logic
 void updateCanvas(Canvas& canvas, const InputState& input, int windowWidth, int windowHeight, double deltaTime) {
     if (input.zoom != 0.0f) {
         float mouseX = input.mouseX;
@@ -49,18 +52,3 @@ void updateCanvas(Canvas& canvas, const InputState& input, int windowWidth, int 
     canvas.lastMouseX = input.mouseX;
     canvas.lastMouseY = input.mouseY;
 }
-
-/*void handleNodeInput(const InputState& input, EntityManager& entityManager, UI& ui, const Canvas& canvas) {
-    if (isMouseOverUI(ui, input.mouseX, input.mouseY) || ui.isDragging) return;
-
-    if (input.leftDown) {
-        Vec2 world = screenToWorld(canvas, input.mouseX, input.mouseY);
-
-        std::cout << "CLICK detected at screen: "
-            << input.mouseX << ", " << input.mouseY << "\n";
-
-        std::cout << "Active tool: " << (int)ui.activeTool << "\n";
-
-        createNode(entityManager, ui.activeTool, world.x, world.y);
-    }
-}*/
