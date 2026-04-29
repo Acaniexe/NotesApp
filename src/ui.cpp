@@ -6,9 +6,7 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& pan
     ui.baseH = (float)windowHeight;
     if (ui.isDragging) return;
 
-    ui.orientation = (ui.dock == DockSide::Top || ui.dock == DockSide::Bottom)
-                     ? Orientation::Horizontal
-                     : Orientation::Vertical;
+    ui.orientation = (ui.dock == DockSide::Top || ui.dock == DockSide::Bottom) ? Orientation::Horizontal : Orientation::Vertical;
 
     float length = (ui.orientation == Orientation::Horizontal) ? ui.baseW : ui.baseH;
 
@@ -43,7 +41,7 @@ void updateUILayout(UI& ui, int windowWidth, int windowHeight, const Panels& pan
             case DockSide::Top:    y = -ui.uiH; break;
             case DockSide::Bottom: y = ui.baseH; break;
             case DockSide::Left:   x = -ui.uiW; break;
-            case DockSide::Right:  x = ui.baseW - ui.uiW - panelOffset; break;
+            case DockSide::Right:  x = ui.baseW; break;
         }
     }
 
@@ -134,11 +132,23 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
 
     if (!ui.isPinned) {
         bool edgeHover = false;
+
+        float panelOffset = (ui.dock == DockSide::Right) ? panels.panelWidth : 0.0f;
+
         switch (ui.dock) {
-            case DockSide::Top:    edgeHover = input.mouseY <= 5.0f; break;
-            case DockSide::Bottom: edgeHover = input.mouseY >= ui.baseH - 5.0f; break;
-            case DockSide::Left:   edgeHover = input.mouseX <= 5.0f; break;
-            case DockSide::Right:  edgeHover = input.mouseX >= ui.baseW - 5.0f; break;
+            case DockSide::Top:    
+                edgeHover = input.mouseY <= 5.0f; 
+                break;
+            case DockSide::Bottom: 
+                edgeHover = input.mouseY >= ui.baseH - 5.0f; 
+                break;
+            case DockSide::Left:   
+                edgeHover = input.mouseX <= 5.0f; 
+                break;
+            case DockSide::Right:
+                edgeHover = input.mouseX >= ui.baseW - ui.uiW - panelOffset &&
+                            input.mouseX <= ui.baseW - panelOffset;
+                break;
         }
         bool overUI = input.mouseX >= ui.uiX && input.mouseX <= ui.uiX + ui.uiW &&
                       input.mouseY >= ui.uiY && input.mouseY <= ui.uiY + ui.uiH;
