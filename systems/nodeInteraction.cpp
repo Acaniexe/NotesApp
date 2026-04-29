@@ -1,12 +1,14 @@
 #include "nodeInteraction.h"
 
 void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& canvas, const UI& ui) {
+    //Ignore node interaction if mouse over UI
     if (isMouseOverUI(ui, input.mouseX, input.mouseY)) return;
 
     Vec2 mouseWorld = screenToWorld(canvas, input.mouseX, input.mouseY);
     static bool draggingStarted = false;
     Entity* clicked = nullptr;
 
+    //Hover detection
     for (auto& entity : em.getEntities()) {
         auto* pos = em.getComponent<PositionComponent>(entity);
         auto* size = em.getComponent<sizeComponent>(entity);
@@ -21,10 +23,12 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
         if (hovered) clicked = &entity;
     }
 
+    //Node deletion
     if (input.delPressed) {
         deleteNode(em);
     }
 
+    //Selection handling 
     if (input.leftDown) {
         if (clicked) {
             auto* clickedState = em.getComponent<stateComponent>(*clicked);
@@ -32,6 +36,7 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
 
             bool multi = input.ctrlHeld;
 
+            //single selection
             if (!multi) {
                 for (auto& e : em.getEntities()) {
                     auto* st = em.getComponent<stateComponent>(e);
@@ -42,6 +47,7 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
 
             clickedState->isSelected = true;
         } else {
+            //Click empty space -> clear selection
             for (auto& e : em.getEntities()) {
                 auto* st = em.getComponent<stateComponent>(e);
                 if (!st) continue;
@@ -52,6 +58,7 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
         draggingStarted = false;
     }
 
+    //Deselect Node
     if (input.rightDown && clicked) {
         auto* clickedState = em.getComponent<stateComponent>(*clicked);
         if (!clickedState) return;
@@ -59,17 +66,20 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
         clickedState->isSelected = false;
     }
 
+    //Drag selected node/s
     if (input.leftHeld && !ui.isDraggingTool) {
         for (auto& e : em.getEntities()) {
             auto* pos = em.getComponent<PositionComponent>(e);
             auto* st = em.getComponent<stateComponent>(e);
             if (!pos || !st || !st->isSelected) continue;
 
+            //Drag offset
             if (!draggingStarted) {
                 st->isDragging = true;
                 st->dragOffset = { pos->x - mouseWorld.x, pos->y - mouseWorld.y };
             }
 
+            //Apply drag movement
             if (st->isDragging) {
                 pos->x = mouseWorld.x + st->dragOffset.x;
                 pos->y = mouseWorld.y + st->dragOffset.y;
@@ -78,6 +88,7 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
         draggingStarted = true;
     }
 
+    //End drag
     if (input.leftReleased && !ui.isDraggingTool) {
         for (auto& e : em.getEntities()) {
             auto* st = em.getComponent<stateComponent>(e);
