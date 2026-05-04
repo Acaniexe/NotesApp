@@ -1,8 +1,26 @@
 #include "nodeInteraction.h"
 
-void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& canvas, const UI& ui) {
+bool isInResizeZone(float mx, float my, PositionComponent* pos, sizeComponent* size) {
+    const float handleSize = 10.0f;
+
+    float right = pos->x + size->width;
+    float bottom = pos->y + size->height;
+
+    return (mx >= right - handleSize && mx <= right &&
+            my >= bottom - handleSize && my <= bottom);
+}
+
+void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& canvas, const UI& ui, Panels& panels) {
     //Ignore node interaction if mouse over UI
     if (isMouseOverUI(ui, input.mouseX, input.mouseY)) return;
+
+    bool overPanel = 
+        input.mouseX >= panels.top.x &&
+        input.mouseX <= panels.top.x + panels.top.w &&
+        input.mouseY >= panels.top.y &&
+        input.mouseY <= panels.top.y + panels.top.h;
+
+    if (overPanel) return;
 
     Vec2 mouseWorld = screenToWorld(canvas, input.mouseX, input.mouseY);
     static bool draggingStarted = false;
@@ -31,8 +49,10 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
     //Selection handling 
     if (input.leftDown) {
         if (clicked) {
-            auto* clickedState = em.getComponent<stateComponent>(*clicked);
-            if (!clickedState) return;
+            auto* pos = em.getComponent<PositionComponent>(*clicked);
+            auto* size = em.getComponent<sizeComponent>(*clicked);
+            auto* st = em.getComponent<stateComponent>(*clicked);
+            if (!pos || !size || !st) return;
 
             bool multi = input.ctrlHeld;
 
@@ -45,7 +65,22 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
                 }
             }
 
-            clickedState->isSelected = true;
+            st->isSelected = true;
+
+            em.bringToFront(*clicked);
+
+            if (!isInResizeZone(mouseWorld.x, mouseWorld.y, pos, size)) {
+                for (auto& e : em.getEntities()) {
+                    auto* p = em.getComponent<PositionComponent>(e);
+                    auto* s = em.getComponent<stateComponent>(e);
+                    if (!p || !s || !s->isSelected) continue;
+
+                    s->isDragging = true;
+                    s->dragOffset = { p->x - mouseWorld.x, p->y - mouseWorld.y };
+                }
+            } else {
+                st->isResizing = true;
+            }
         } else {
             //Click empty space -> clear selection
             for (auto& e : em.getEntities()) {
@@ -70,20 +105,20 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
     if (input.leftHeld && !ui.isDraggingTool) {
         for (auto& e : em.getEntities()) {
             auto* pos = em.getComponent<PositionComponent>(e);
+            auto* size = em.getComponent<sizeComponent>(e);
             auto* st = em.getComponent<stateComponent>(e);
-            if (!pos || !st || !st->isSelected) continue;
 
-            //Drag offset
-            if (!draggingStarted) {
-                st->isDragging = true;
-                st->dragOffset = { pos->x - mouseWorld.x, pos->y - mouseWorld.y };
+            if (!pos || !size || !st || !st->isSelected) continue;
+
+            if (st->isResizing) {
+                size->width = std::max(50.0f, mouseWorld.x - pos->x);
+                size->height = std::max(30.0f, mouseWorld.y - pos->y);
             }
-
-            //Apply drag movement
-            if (st->isDragging) {
+            else if (st->isDragging) {
+                //Apply drag movement
                 pos->x = mouseWorld.x + st->dragOffset.x;
                 pos->y = mouseWorld.y + st->dragOffset.y;
-            }
+            } 
         }
         draggingStarted = true;
     }
@@ -94,6 +129,7 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
             auto* st = em.getComponent<stateComponent>(e);
             if (!st) continue;
             st->isDragging = false;
+            st->isResizing = false;
         }
         draggingStarted = false;
     }

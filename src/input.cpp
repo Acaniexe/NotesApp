@@ -14,6 +14,8 @@ void eventHandler(App& app) {
     app.input.ctrlDown = false;
     app.input.ctrlReleased = false;
     app.input.zoom = 0.0f;
+    app.input.textInput.clear();
+    app.input.backspaceDown = false;
 
     //Event queue
     while (SDL_PollEvent(&event)) {
@@ -68,6 +70,11 @@ void eventHandler(App& app) {
                 }
                 break;
 
+            //Text input capture
+            case SDL_EVENT_TEXT_INPUT:
+                app.input.textInput += event.text.text;
+                break;
+
             //Keyboard key press 
             case SDL_EVENT_KEY_DOWN:
                 if (event.key.repeat == 0) {
@@ -76,6 +83,13 @@ void eventHandler(App& app) {
                     }
                     else if (event.key.scancode == SDL_SCANCODE_DELETE) {
                         app.input.delPressed = true;
+                    }
+                    else if (event.key.scancode == SDL_SCANCODE_BACKSPACE) {
+                        app.input.backspaceHeld = true;
+
+                        if (event.key.repeat == 0) {
+                            app.input.backspaceDown = true;
+                        }
                     }
                 }
                 break;
@@ -87,6 +101,10 @@ void eventHandler(App& app) {
                 }
                 else if (event.key.scancode == SDL_SCANCODE_DELETE) {
                     app.input.delPressed = false;
+                }
+                else if (event.key.scancode == SDL_SCANCODE_BACKSPACE) {
+                    app.input.backspaceHeld = false;
+                    app.input.backspaceTimer = 0.0f;
                 }
                 break;
         }
@@ -101,4 +119,23 @@ void eventHandler(App& app) {
     app.input.ctrlReleased = !app.input.ctrlHeld && app.input.prevCtrlHeld;
 
     app.input.prevCtrlHeld = app.input.ctrlHeld;
+}
+
+void updateInputRepeat(InputState& input, float deltaTime) {
+    input.backspacePressed = false;
+
+    if (input.backspaceHeld) {
+        input.backspaceTimer += deltaTime;
+
+          if (input.backspaceTimer >= input.backspaceDelay) {
+            
+            while (input.backspaceTimer >= input.backspaceDelay + input.backspaceRepeat) {
+                input.backspaceTimer -= input.backspaceRepeat;
+                input.backspacePressed = true;
+            }
+        }
+    } 
+    else {
+        input.backspaceTimer = 0.0f;
+    }
 }

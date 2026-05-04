@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 //Input states
 struct InputState {
@@ -25,4 +26,14 @@ struct InputState {
     bool delPressed = false;
 
     bool dockCollapsePressed = false;
+
+    std::string textInput;
+    float backspaceTimer = 0.0f;
+    float backspaceDelay = 0.4f;
+    float backspaceRepeat = 0.05f;
+    bool backspaceDown = false;
+    bool backspacePressed = false;
+    bool backspaceHeld = false;
 };
+
+void updateInputRepeat(InputState& input, float deltaTime);

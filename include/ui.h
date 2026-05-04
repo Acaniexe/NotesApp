@@ -75,6 +75,11 @@ struct Panel {
     float x, y, w, h;
 };
 
+struct PanelEntry {
+    Entity entity;
+    float x, y, w, h;
+};
+
 //Panels state
 struct Panels {
     Panel top;
@@ -89,6 +94,8 @@ struct Panels {
 
     bool isDraggingDivider = false;
     bool isDraggingWidth = false;
+
+    std::vector<PanelEntry> entries;
 };
 
 //UI functions
@@ -97,5 +104,5 @@ void updateToolButtons(UI& ui);
 void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& entityManager, const Panels& panels);
 void updateToolbarResize(UI& ui, InputState& input, const Panels& panels);
 void updatePanels(Panels& panels, int windowWidth, int windowHeight);
-void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int windowHeight);
+void updatePanelsState(Panels& panels, EntityManager& em, InputState& input, int windowWidth, int windowHeight);
 bool isMouseOverUI(const UI& ui, float mx, float my);

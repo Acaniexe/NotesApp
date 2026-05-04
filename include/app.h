@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include "input.h"
 #include "canvas.h"
 #include "ui.h"
@@ -11,6 +12,7 @@ struct App {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
     SDL_Surface* icon = nullptr;
+    TTF_Font* font = nullptr;
 
     //Window state
     int windowWidth = 900;

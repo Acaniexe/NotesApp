@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include <algorithm>
 
 //Clears the screen at start of each frame
 void beginFrame(SDL_Renderer* renderer) {
@@ -39,7 +40,7 @@ void renderCanvas(SDL_Renderer* renderer, const Canvas& canvas, int windowWidth,
 }
 
 //Renders nodes on canvas
-void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas, float windowWidth, float windowHeight) {
+void renderNodes(SDL_Renderer* renderer, TTF_Font* font, EntityManager& em, const Canvas& canvas, float windowWidth, float windowHeight) {
     const float margin = 200.0f; //Extra margin for smooth visibility on camera move
 
     float left = canvas.cameraX - margin;
@@ -79,7 +80,7 @@ void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas
             case NodeType::Link: SDL_SetRenderDrawColor(renderer, 245, 222, 179, 255); break;
             case NodeType::Grid: SDL_SetRenderDrawColor(renderer, 152, 251, 152, 255); break;
             case NodeType::Line: SDL_SetRenderDrawColor(renderer, 30, 144, 255, 255); break;
-            case NodeType::Draw: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
+            //case NodeType::Draw: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
             case NodeType::Colour: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); break;
             case NodeType::Comment: SDL_SetRenderDrawColor(renderer, 255, 228, 225, 255); break;
             case NodeType::Code: SDL_SetRenderDrawColor(renderer, 112, 128, 144, 255); break;
@@ -95,6 +96,36 @@ void renderNodes(SDL_Renderer* renderer, EntityManager& em, const Canvas& canvas
         }
 
         SDL_RenderFillRect(renderer, &rect);
+
+        auto* text = em.getComponent<TextComponent>(entity);
+        if (text && !text->text.empty() && font) {
+
+            SDL_Color color = {0, 0, 0, 255};
+            int wrapWidth = std::max(10, (int)(size->width - 10));
+
+            SDL_Surface* surface = TTF_RenderText_Blended_Wrapped(
+                font,
+                text->text.c_str(),
+                text->text.length(),
+                color,
+                wrapWidth
+            );
+
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+            float scale = canvas.zoom;
+
+            SDL_FRect textRect;
+            textRect.x = rect.x + 5;
+            textRect.y = rect.y + 5;
+            textRect.w = surface->w * scale;
+            textRect.h = surface->h * scale;
+
+            SDL_RenderTexture(renderer, texture, nullptr, &textRect);
+
+            SDL_DestroyTexture(texture);
+            SDL_DestroySurface(surface);
+        }
     }
 }
 
@@ -177,7 +208,7 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
             case NodeType::Link: SDL_SetRenderDrawColor(renderer, 245, 222, 179, 200); break;
             case NodeType::Grid: SDL_SetRenderDrawColor(renderer, 152, 251, 152, 200); break;
             case NodeType::Line: SDL_SetRenderDrawColor(renderer, 30, 144, 255, 200); break;
-            case NodeType::Draw: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
+            //case NodeType::Draw: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
             case NodeType::Colour: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
             case NodeType::Comment: SDL_SetRenderDrawColor(renderer, 255, 228, 225, 200); break;
             case NodeType::Code: SDL_SetRenderDrawColor(renderer, 112, 128, 144, 200); break;
@@ -189,7 +220,9 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
 }
 
 //Renders the side panels
-void renderPanels(SDL_Renderer* renderer, const Panels& panels) {
+void renderPanels(SDL_Renderer* renderer, TTF_Font* font, EntityManager& em, Panels& panels) {
+    panels.entries.clear();
+
     SDL_FRect top = { panels.top.x, panels.top.y, panels.top.w, panels.top.h };
     SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
     SDL_RenderFillRect(renderer, &top);
@@ -201,6 +234,60 @@ void renderPanels(SDL_Renderer* renderer, const Panels& panels) {
     SDL_FRect divider = { panels.top.x, panels.top.y + panels.top.h, panels.top.w, panels.dividerHeight };
     SDL_SetRenderDrawColor(renderer, 110, 110,110, 255);
     SDL_RenderFillRect(renderer, &divider);
+
+    if (!font) return;
+
+    float padding = 5.0f;
+    float yOffset = panels.top.y + padding;
+
+    //Makes new list to display
+    std::vector<Entity> entities = em.getEntities();
+    std::sort(entities.begin(), entities.end(), [](const Entity& a, const Entity& b) {
+        return a.id < b.id;
+    });
+
+    for (auto& e : entities) {
+        auto* type = em.getComponent<NodeTypeComponent>(e);
+        if (!type) continue;
+
+        std::string label = std::string(nodeTypeToString(type->type)) + " [" + std::to_string(e.id) + "]";
+
+        SDL_Color color = { 255, 255, 255, 255 };
+
+        SDL_Surface* surface = TTF_RenderText_Blended(
+            font,
+            label.c_str(),
+            label.length(),
+            color
+        );
+
+        if (!surface) continue;
+
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+        SDL_FRect textRect;
+        textRect.x = panels.top.x + padding;
+        textRect.y = yOffset;
+        textRect.w = (float)surface->w;
+        textRect.h = (float)surface->h;
+
+        panels.entries.push_back({
+            e,
+            textRect.x,
+            textRect.y,
+            textRect.w,
+            textRect.h
+        });
+
+        SDL_RenderTexture(renderer, texture, nullptr, &textRect);
+
+        yOffset += surface->h + 4;
+
+        SDL_DestroyTexture(texture);
+        SDL_DestroySurface(surface);
+
+        if (yOffset > panels.top.y + panels.top.h) break;
+    }
 }
 
 //Presents the rendered frame to screen

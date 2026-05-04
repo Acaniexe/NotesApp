@@ -31,7 +31,7 @@ inline Vec2 getNodeBaseSize(NodeType type) {
         case NodeType::Link:    return {150.0f, 50.0f};
         case NodeType::Grid:    return {300.0f, 300.0f};
         case NodeType::Line:    return {200.0f, 5.0f};
-        case NodeType::Draw:    return {300.0f, 200.0f};
+        //case NodeType::Draw:    return {300.0f, 200.0f};
         case NodeType::Colour:  return {100.0f, 100.0f};
         case NodeType::Comment: return {200.0f, 100.0f};
         case NodeType::Code:    return {300.0f, 150.0f};
@@ -63,12 +63,22 @@ struct sizeComponent {
     sizeComponent(float w, float h) : width(w), height(h) {}
 };
 
+enum class ResizeDir {
+    None,
+    Right,
+    Bottom,
+    Corner
+};
+
 struct stateComponent {
     bool isSelected = false;
     bool isHovered = false;
     bool isDragging = false;
+    bool isResizing = false;
 
     Vec2 dragOffset;
+
+    ResizeDir resizeDir = ResizeDir::None;
 };
 
 struct TextComponent {
@@ -95,6 +105,7 @@ class EntityManager {
 public:
     Entity createEntity();
     void removeEntity(const Entity& entity);
+    void bringToFront(const Entity& entity);
 
     template<typename T, typename... Args>
     void addComponent(Entity entity, Args&&... args);
@@ -145,3 +156,4 @@ bool EntityManager::hasComponent(Entity entity) {
 // factory
 Entity createNode(EntityManager& em, NodeType type, float x, float y);
 void deleteNode(EntityManager& em);
+const char* nodeTypeToString(NodeType type);

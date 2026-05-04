@@ -64,8 +64,7 @@ void updateToolButtons(UI& ui) {
     ui.toolButtons.clear();
 
     NodeType types[] = { NodeType::Note, NodeType::Text, NodeType::Image, NodeType::ToDo, NodeType::Link,
-                         NodeType::Grid, NodeType::Line, NodeType::Draw, NodeType::Colour,
-                         NodeType::Comment, NodeType::Code };
+                         NodeType::Grid, NodeType::Line, NodeType::Colour, NodeType::Comment, NodeType::Code };
 
     float buttonOffset = 25.0f + 10.0f; //Visual spacing offset
 
@@ -206,7 +205,7 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
             else if (input.mouseX < margin) ui.dock = DockSide::Left;
             else if (input.mouseX > ui.baseW - panels.panelWidth - (ui.uiW * 0.5f))
                 ui.dock = DockSide::Right;
-}
+        }
     }
 
     //Handles pin state
@@ -280,7 +279,7 @@ void updatePanels(Panels& panels, int windowWidth, int windowHeight) {
 }
 
 //Handles panel state: dragging divider and resize panel width
-void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int windowHeight) {
+void updatePanelsState(Panels& panels, EntityManager& em, InputState& input, int windowWidth, int windowHeight) {
     float baseW = (float)windowWidth;
     float panelX = baseW - panels.panelWidth;
     float dividerY = panels.top.y + panels.top.h;
@@ -314,6 +313,30 @@ void updatePanelsState(Panels& panels, InputState& input, int windowWidth, int w
     if (panels.isDraggingWidth && input.leftHeld) {
         float newWidth = baseW - input.mouseX;
         panels.panelWidth = std::clamp(newWidth, panels.minWidth, panels.maxWidth);
+    }
+
+    if (input.leftDown) {
+        for (auto& entry : panels.entries) {
+            bool over = 
+                input.mouseX >= entry.x &&
+                input.mouseX <= entry.x + entry.w &&
+                input.mouseY >= entry.y &&
+                input.mouseY <= entry.y + entry.h;
+
+            if (over) {
+                for (auto e : em.getEntities()) {
+                    auto* st = em.getComponent<stateComponent>(e);
+                    if (st) st->isSelected = false;
+                }
+            }
+
+            auto* st = em.getComponent<stateComponent>(entry.entity);
+            if (st) st->isSelected = true;
+
+            em.bringToFront(entry.entity);
+
+            break;
+        }
     }
 
     if (input.leftReleased) {

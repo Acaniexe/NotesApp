@@ -32,7 +32,7 @@ static Entity createText(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
-    em.addComponent<TextComponent>(e, "Text");
+    em.addComponent<TextComponent>(e, "Default");
     em.addComponent<NodeTypeComponent>(e, NodeType::Text);
     em.addComponent<stateComponent>(e);
     return e;
@@ -91,14 +91,14 @@ static Entity createLine(EntityManager& em, float x, float y) {
     return e;
 }
 
-//Node Draw
+/*//Node Draw (Not actually a node, This is free hand draw)
 static Entity createDraw(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 300.0f, 200.0f);
     em.addComponent<NodeTypeComponent>(e, NodeType::Draw);
     return e;
-}
+}*/
 
 //Node Colour
 static Entity createColour(EntityManager& em, float x, float y) {
@@ -110,7 +110,7 @@ static Entity createColour(EntityManager& em, float x, float y) {
     return e;
 }
 
-//Node Comment
+//Node Comment (Theoretical node, will be used as a drag select + 'c' to comment things)
 static Entity createComment(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
@@ -142,7 +142,7 @@ const char* nodeTypeToString(NodeType type) {
         case NodeType::Link:    return "Link";
         case NodeType::Grid:    return "Grid";
         case NodeType::Line:    return "Line";
-        case NodeType::Draw:    return "Draw";
+        //case NodeType::Draw:    return "Draw";
         case NodeType::Colour:  return "Colour";
         case NodeType::Comment: return "Comment";
         case NodeType::Code:    return "Code";
@@ -162,7 +162,7 @@ Entity createNode(EntityManager& em, NodeType type, float x, float y) {
         case NodeType::Link:    result = createLink(em, x, y); break;
         case NodeType::Grid:    result = createGrid(em, x, y); break;
         case NodeType::Line:    result = createLine(em, x, y); break;
-        case NodeType::Draw:    result = createDraw(em, x, y); break;
+        //case NodeType::Draw:    result = createDraw(em, x, y); break;
         case NodeType::Colour:  result = createColour(em, x, y); break;
         case NodeType::Comment: result = createComment(em, x, y); break;
         case NodeType::Code:    result = createCode(em, x, y); break;
@@ -204,5 +204,15 @@ void deleteNode(EntityManager& em) {
 
     for (auto& e : toDelete) {
         em.removeEntity(e);
+    }
+}
+
+void EntityManager::bringToFront(const Entity& entity) {
+    auto it = std::find_if(entities.begin(), entities.end(), [&entity](const Entity& e) { return e.id == entity.id; });
+
+    if (it != entities.end()) {
+        Entity temp = *it;
+        entities.erase(it);
+        entities.push_back(temp);
     }
 }
