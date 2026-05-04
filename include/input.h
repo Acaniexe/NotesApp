@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+class EntityManager;
+
 //Input states
 struct InputState {
     bool windowResized = false;
@@ -28,6 +30,8 @@ struct InputState {
     bool dockCollapsePressed = false;
 
     std::string textInput;
+    bool isTyping = false;
+
     float backspaceTimer = 0.0f;
     float backspaceDelay = 0.4f;
     float backspaceRepeat = 0.05f;
@@ -37,3 +41,4 @@ struct InputState {
 };
 
 void updateInputRepeat(InputState& input, float deltaTime);
+void updateTypingState(InputState& input, EntityManager& em);

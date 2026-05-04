@@ -75,6 +75,7 @@ struct stateComponent {
     bool isHovered = false;
     bool isDragging = false;
     bool isResizing = false;
+    bool isEditing = false;
 
     Vec2 dragOffset;
 

@@ -56,6 +56,7 @@ void update(App& app, double deltaTime) {
     updateToolbarResize(app.ui, app.input, app.panels);
     updateNodeInteraction(app.input, app.EntityManager, app.canvas, app.ui, app.panels);
     updateInputRepeat(app.input, deltaTime);
+    updateTypingState(app.input, app.EntityManager);
     updateTextInput(app.input, app.EntityManager);
 }
 

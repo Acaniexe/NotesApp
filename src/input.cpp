@@ -139,3 +139,16 @@ void updateInputRepeat(InputState& input, float deltaTime) {
         input.backspaceTimer = 0.0f;
     }
 }
+
+void updateTypingState(InputState& input, EntityManager& em) {
+    input.isTyping = false;
+
+    for (auto& e : em.getEntities()) {
+        auto* st = em.getComponent<stateComponent>(e);
+
+        if (st && st->isEditing) {
+            input.isTyping = true;
+            return;
+        }
+    }
+}

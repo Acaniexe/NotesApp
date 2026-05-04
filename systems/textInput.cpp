@@ -1,6 +1,9 @@
 #include "textInput.h"
+#include "ecs.h"
 
 void updateTextInput(InputState& input, EntityManager& em) {
+    if (!input.isTyping) return;
+
     for (auto& e : em.getEntities()) {
         auto* state = em.getComponent<stateComponent>(e);
         auto* text  = em.getComponent<TextComponent>(e);

@@ -14,6 +14,14 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
     //Ignore node interaction if mouse over UI
     if (isMouseOverUI(ui, input.mouseX, input.mouseY)) return;
 
+    //Node deletion
+    if (input.delPressed && !input.isTyping) {
+        if (!input.isTyping) {
+            deleteNode(em);
+        }
+        input.delPressed = false;
+    }
+
     bool overPanel = 
         input.mouseX >= panels.top.x &&
         input.mouseX <= panels.top.x + panels.top.w &&
@@ -41,11 +49,6 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
         if (hovered) clicked = &entity;
     }
 
-    //Node deletion
-    if (input.delPressed) {
-        deleteNode(em);
-    }
-
     //Selection handling 
     if (input.leftDown) {
         if (clicked) {
@@ -61,7 +64,10 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
                 for (auto& e : em.getEntities()) {
                     auto* st = em.getComponent<stateComponent>(e);
                     if (!st) continue;
-                    if (&e != clicked) st->isSelected = false;
+                    if (&e != clicked) {
+                        st->isSelected = false; 
+                        st->isEditing = false;
+                    }
                 }
             }
 
@@ -87,6 +93,7 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
                 auto* st = em.getComponent<stateComponent>(e);
                 if (!st) continue;
                 st->isSelected = false;
+                st->isEditing = false;
             }
         }
 

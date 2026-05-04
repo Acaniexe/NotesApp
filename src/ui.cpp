@@ -315,7 +315,7 @@ void updatePanelsState(Panels& panels, EntityManager& em, InputState& input, int
         panels.panelWidth = std::clamp(newWidth, panels.minWidth, panels.maxWidth);
     }
 
-    if (input.leftDown) {
+    if (input.leftDown && !panels.isDraggingDivider && !panels.isDraggingWidth) {
         for (auto& entry : panels.entries) {
             bool over = 
                 input.mouseX >= entry.x &&
@@ -323,11 +323,11 @@ void updatePanelsState(Panels& panels, EntityManager& em, InputState& input, int
                 input.mouseY >= entry.y &&
                 input.mouseY <= entry.y + entry.h;
 
-            if (over) {
-                for (auto e : em.getEntities()) {
-                    auto* st = em.getComponent<stateComponent>(e);
-                    if (st) st->isSelected = false;
-                }
+            if (!over) continue;
+
+            for (auto e : em.getEntities()) {
+                auto* st = em.getComponent<stateComponent>(e);
+                if (st) st->isSelected = false;
             }
 
             auto* st = em.getComponent<stateComponent>(entry.entity);
