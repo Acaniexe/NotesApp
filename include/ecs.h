@@ -77,6 +77,8 @@ struct stateComponent {
     bool isResizing = false;
     bool isEditing = false;
 
+    float editTimer = 0.0f;
+
     Vec2 dragOffset;
 
     ResizeDir resizeDir = ResizeDir::None;

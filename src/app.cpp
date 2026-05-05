@@ -13,7 +13,7 @@ bool init(App& app) {
     }
 
     TTF_Init();
-    app.font = TTF_OpenFont("assets/fonts/HelpMe.ttf", 16);
+    app.font = TTF_OpenFont("assets/fonts/VendSans-Regular.ttf", 16);
     
     if (!app.font) {
         std::cout << "Font failed: " << SDL_GetError() << std::endl;
@@ -56,8 +56,9 @@ void update(App& app, double deltaTime) {
     updateToolbarResize(app.ui, app.input, app.panels);
     updateNodeInteraction(app.input, app.EntityManager, app.canvas, app.ui, app.panels);
     updateInputRepeat(app.input, deltaTime);
-    updateTypingState(app.input, app.EntityManager);
     updateTextInput(app.input, app.EntityManager);
+    updateEditingTimeout(app.EntityManager, deltaTime);
+    updateTypingState(app.input, app.EntityManager);
 }
 
 //Handles render loop

@@ -146,7 +146,7 @@ void updateTypingState(InputState& input, EntityManager& em) {
     for (auto& e : em.getEntities()) {
         auto* st = em.getComponent<stateComponent>(e);
 
-        if (st && st->isEditing) {
+        if (st && st->isEditing && em.hasComponent<TextComponent>(e)) {
             input.isTyping = true;
             return;
         }

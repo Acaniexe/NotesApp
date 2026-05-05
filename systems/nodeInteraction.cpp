@@ -16,9 +16,7 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
 
     //Node deletion
     if (input.delPressed && !input.isTyping) {
-        if (!input.isTyping) {
-            deleteNode(em);
-        }
+        deleteNode(em);
         input.delPressed = false;
     }
 
