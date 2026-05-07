@@ -125,9 +125,7 @@ private:
     uint32_t nextEntityId = 1;
     std::vector<Entity> entities;
 
-    std::unordered_map<uint32_t,
-        std::unordered_map<std::type_index, std::shared_ptr<void>>
-    > componentStorage;
+    std::unordered_map<uint32_t, std::unordered_map<std::type_index, std::shared_ptr<void>>> componentStorage;
 };
 
 // TEMPLATE IMPLEMENTATION

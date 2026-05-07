@@ -1,4 +1,5 @@
 #include "nodeInteraction.h"
+#include <iostream>
 
 bool isInResizeZone(float mx, float my, PositionComponent* pos, sizeComponent* size) {
     const float handleSize = 10.0f;
@@ -10,7 +11,7 @@ bool isInResizeZone(float mx, float my, PositionComponent* pos, sizeComponent* s
             my >= bottom - handleSize && my <= bottom);
 }
 
-void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& canvas, const UI& ui, Panels& panels) {
+void updateNodeInteraction(InputState& input, EntityManager& em, Canvas& canvas, const UI& ui, Panels& panels, int windowWidth, int windowHeight) {
     //Ignore node interaction if mouse over UI
     if (isMouseOverUI(ui, input.mouseX, input.mouseY)) return;
 
@@ -31,6 +32,8 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
     Vec2 mouseWorld = screenToWorld(canvas, input.mouseX, input.mouseY);
     static bool draggingStarted = false;
     Entity* clicked = nullptr;
+    int windowX = windowWidth / 2.0f;
+    int windowY = windowHeight / 2.0f;
 
     //Hover detection
     for (auto& entity : em.getEntities()) {
@@ -137,5 +140,43 @@ void updateNodeInteraction(InputState& input, EntityManager& em, const Canvas& c
             st->isResizing = false;
         }
         draggingStarted = false;
+    }
+
+    if (input.ctrlHeld && input.findNode) {
+        for (auto& e : em.getEntities()) {
+            auto* pos = em.getComponent<PositionComponent>(e);
+            auto* st = em.getComponent<stateComponent>(e);
+            auto* size = em.getComponent<sizeComponent>(e);
+            if (!pos || !st || !size || !st->isSelected) continue;
+        
+            canvas.cameraX = (pos->x + size->width * 0.5f) - (windowX / canvas.zoom);
+            canvas.cameraY = (pos->y + size->height * 0.5f) - (windowY / canvas.zoom);
+        }
+    }
+
+    if (input.ctrlHeld && input.duplicateNode) {
+        Vec2 world = screenToWorld(canvas, input.mouseX, input.mouseY);
+
+        std::vector<Entity> selected;
+
+        for (auto& e : em.getEntities()) {
+            auto* st = em.getComponent<stateComponent>(e);
+            if (st && st->isSelected)
+                selected.push_back(e);
+        }
+
+        for (auto& source : selected) {
+            auto* type = em.getComponent<NodeTypeComponent>(source);
+            if (!type) continue;
+
+            Entity newNode = createNode(em, type->type, world.x, world.y);
+
+            if (auto* srcText = em.getComponent<TextComponent>(source))
+                em.addComponent<TextComponent>(newNode, srcText->text);
+
+            if (auto* srcSize = em.getComponent<sizeComponent>(source))
+                em.addComponent<sizeComponent>(newNode, srcSize->width, srcSize->height);
+        }
+        input.duplicateNode = false;
     }
 }

@@ -26,6 +26,8 @@ struct InputState {
     bool prevCtrlHeld = false;
 
     bool delPressed = false;
+    bool findNode = false;
+    bool duplicateNode = false;
 
     bool dockCollapsePressed = false;
 

@@ -91,6 +91,12 @@ void eventHandler(App& app) {
                             app.input.backspaceDown = true;
                         }
                     }
+                    else if (event.key.scancode == SDL_SCANCODE_F) {
+                        app.input.findNode = true;
+                    }
+                    else if (event.key.scancode == SDL_SCANCODE_D) {
+                        app.input.duplicateNode = true;
+                    }
                 }
                 break;
 
@@ -105,6 +111,12 @@ void eventHandler(App& app) {
                 else if (event.key.scancode == SDL_SCANCODE_BACKSPACE) {
                     app.input.backspaceHeld = false;
                     app.input.backspaceTimer = 0.0f;
+                }
+                else if (event.key.scancode == SDL_SCANCODE_F) {
+                    app.input.findNode = false;
+                }
+                else if (event.key.scancode == SDL_SCANCODE_D) {
+                    app.input.duplicateNode = false;
                 }
                 break;
         }

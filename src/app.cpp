@@ -54,7 +54,7 @@ void update(App& app, double deltaTime) {
     updateUILayout(app.ui, app.windowWidth, app.windowHeight, app.panels);
     updateToolButtons(app.ui);
     updateToolbarResize(app.ui, app.input, app.panels);
-    updateNodeInteraction(app.input, app.EntityManager, app.canvas, app.ui, app.panels);
+    updateNodeInteraction(app.input, app.EntityManager, app.canvas, app.ui, app.panels, app.windowWidth, app.windowHeight);
     updateInputRepeat(app.input, deltaTime);
     updateTextInput(app.input, app.EntityManager);
     updateEditingTimeout(app.EntityManager, deltaTime);
