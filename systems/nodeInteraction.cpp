@@ -161,22 +161,15 @@ void updateNodeInteraction(InputState& input, EntityManager& em, Canvas& canvas,
 
         for (auto& e : em.getEntities()) {
             auto* st = em.getComponent<stateComponent>(e);
+
             if (st && st->isSelected)
                 selected.push_back(e);
         }
 
-        for (auto& source : selected) {
-            auto* type = em.getComponent<NodeTypeComponent>(source);
-            if (!type) continue;
-
-            Entity newNode = createNode(em, type->type, world.x, world.y);
-
-            if (auto* srcText = em.getComponent<TextComponent>(source))
-                em.addComponent<TextComponent>(newNode, srcText->text);
-
-            if (auto* srcSize = em.getComponent<sizeComponent>(source))
-                em.addComponent<sizeComponent>(newNode, srcSize->width, srcSize->height);
+        for (auto& e : selected) {
+            cloneNode(em, e, world.x + 20.0f, world.y + 20.0f);
         }
+
         input.duplicateNode = false;
     }
 }

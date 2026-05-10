@@ -342,4 +342,7 @@ void updatePanelsState(Panels& panels, EntityManager& em, InputState& input, int
     if (input.leftReleased) {
         panels.isDraggingWidth = false;
     }
+
+    //Properties tab inputs
+    
 }

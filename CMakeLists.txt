@@ -13,10 +13,10 @@ file(GLOB SRC_FILES
      "systems/*.cpp"
 )
 
-add_executable(app ${SRC_FILES})
+add_executable(plasma ${SRC_FILES})
 
 # INCLUDE PATHS
-target_include_directories(app PRIVATE
+target_include_directories(plasma PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/SDL3/${SDL_ARCH}/include
     ${CMAKE_SOURCE_DIR}/include
@@ -25,20 +25,20 @@ target_include_directories(app PRIVATE
 )
 
 # LINK PATHS
-target_link_directories(app PRIVATE
+target_link_directories(plasma PRIVATE
     ${CMAKE_SOURCE_DIR}/SDL3/${SDL_ARCH}/lib
     ${CMAKE_SOURCE_DIR}/SDL3_ttf/${SDL_ARCH}/lib
     ${CMAKE_SOURCE_DIR}/SDL3_image/${SDL_ARCH}/lib
 )
 
-target_link_libraries(app
+target_link_libraries(plasma
     SDL3
     SDL3_ttf
     SDL3_image
 )
 
 # COPY DLLs
-add_custom_command(TARGET app POST_BUILD
+add_custom_command(TARGET plasma POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory
         ${CMAKE_SOURCE_DIR}/bin
 
@@ -56,8 +56,8 @@ add_custom_command(TARGET app POST_BUILD
 )
 
 # COPY ASSETS
-add_custom_command(TARGET app POST_BUILD
+add_custom_command(TARGET plasma POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets
-        $<TARGET_FILE_DIR:app>/assets
+        $<TARGET_FILE_DIR:plasma>/assets
 )

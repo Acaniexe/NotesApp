@@ -72,19 +72,16 @@ void renderNodes(SDL_Renderer* renderer, TTF_Font* font, EntityManager& em, cons
         rect.h = size->height * canvas.zoom;
 
         //Base colour by node type
-        switch (type ? type->type : NodeType::Note) {
-            case NodeType::Note: SDL_SetRenderDrawColor(renderer, 255, 255, 100, 255); break;
-            case NodeType::Text: SDL_SetRenderDrawColor(renderer, 100, 200, 255, 255); break;
-            case NodeType::Image: SDL_SetRenderDrawColor(renderer, 255, 150, 150, 255); break;
-            case NodeType::ToDo: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); break;
-            case NodeType::Link: SDL_SetRenderDrawColor(renderer, 245, 222, 179, 255); break;
-            case NodeType::Grid: SDL_SetRenderDrawColor(renderer, 152, 251, 152, 255); break;
-            case NodeType::Line: SDL_SetRenderDrawColor(renderer, 30, 144, 255, 255); break;
-            //case NodeType::Draw: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200); break;
-            case NodeType::Colour: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); break;
-            case NodeType::Comment: SDL_SetRenderDrawColor(renderer, 255, 228, 225, 255); break;
-            case NodeType::Code: SDL_SetRenderDrawColor(renderer, 112, 128, 144, 255); break;
-            default: SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255); break;
+        auto* style = em.getComponent<StyleComponent>(entity);
+
+        if (style) {
+            SDL_SetRenderDrawColor(
+                renderer,
+                style->backgroundColour.r,
+                style->backgroundColour.g,
+                style->backgroundColour.b,
+                style->backgroundColour.a
+            );
         }
 
         //Override for hovered or selected state
@@ -287,6 +284,74 @@ void renderPanels(SDL_Renderer* renderer, TTF_Font* font, EntityManager& em, Pan
         SDL_DestroySurface(surface);
 
         if (yOffset > panels.top.y + panels.top.h) break;
+    }
+
+    Entity selected = getSelectedEntity(em);
+
+    if (selected.id != 0) {
+        float x = panels.bottom.x + 8.0f;
+        float y = panels.bottom.y + 8.0f;
+
+        auto drawText = [&](const std::string& str) {
+            SDL_Color colour = {255,255,255,255};
+
+            SDL_Surface* surface = TTF_RenderText_Blended(
+                font,
+                str.c_str(),
+                str.length(),
+                colour
+            );
+
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+            SDL_FRect rect = {
+                x,
+                y,
+                (float)surface->w,
+                (float)surface->h
+            };
+
+            SDL_RenderTexture(renderer, texture, nullptr, &rect);
+
+            y += surface->h + 6;
+
+            SDL_DestroyTexture(texture);
+            SDL_DestroySurface(surface);
+        };
+
+        drawText("Properties");
+
+        if (auto* title = em.getComponent<TitleComponent>(selected)) {
+            drawText("Title: " + title->title);
+        }
+
+        if (auto* pos = em.getComponent<PositionComponent>(selected)) {
+            drawText("Position: ");
+            drawText("X: " + std::to_string((int)pos->x) + 
+                     " Y: " + std::to_string((int)pos->y));
+        }
+
+        if (auto* size = em.getComponent<sizeComponent>(selected)) {
+            drawText("Size: ");
+            drawText("W: " + std::to_string((int)size->width) + 
+                     " H: " + std::to_string((int)size->height));
+        }
+
+        if (auto* text = em.getComponent<TextComponent>(selected)) {
+            drawText("Content");
+            drawText(text->text);
+        }
+
+        if (auto* style = em.getComponent<StyleComponent>(selected)) {
+            drawText("Style");
+
+            drawText(
+                "BG: " +
+                std::to_string(style->backgroundColour.r) + ", " +
+                std::to_string(style->backgroundColour.g) + ", " +
+                std::to_string(style->backgroundColour.b)
+            );
+        }
     }
 }
 

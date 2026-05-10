@@ -22,8 +22,17 @@ static Entity createNote(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
     em.addComponent<TextComponent>(e, "New note");
+    em.addComponent<TitleComponent>(e, "Note");
     em.addComponent<NodeTypeComponent>(e, NodeType::Note);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {255, 255, 100, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -33,8 +42,17 @@ static Entity createText(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
     em.addComponent<TextComponent>(e, "Default");
+    em.addComponent<TitleComponent>(e, "Text");
     em.addComponent<NodeTypeComponent>(e, NodeType::Text);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {100, 200, 255, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -44,8 +62,17 @@ static Entity createImage(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
     em.addComponent<ImageComponent>(e, "");
+    em.addComponent<TitleComponent>(e, "Image");
     em.addComponent<NodeTypeComponent>(e, NodeType::Image);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {255, 150, 150, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -55,8 +82,17 @@ static Entity createToDo(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 200.0f, 150.0f);
     em.addComponent<TextComponent>(e, "Text");
+    em.addComponent<TitleComponent>(e, "ToDo");
     em.addComponent<NodeTypeComponent>(e, NodeType::ToDo);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {0, 255, 0, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -66,8 +102,17 @@ static Entity createLink(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 150.0f, 50.0f);
     em.addComponent<TextComponent>(e, "Link");
+    em.addComponent<TitleComponent>(e, "Link");
     em.addComponent<NodeTypeComponent>(e, NodeType::Link);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {245, 222, 179, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -76,8 +121,17 @@ static Entity createGrid(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 300.0f, 300.0f);
+    em.addComponent<TitleComponent>(e, "Grid");
     em.addComponent<NodeTypeComponent>(e, NodeType::Grid);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {152, 251, 152, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -86,8 +140,17 @@ static Entity createLine(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 200.0f, 15.0f);
+    em.addComponent<TitleComponent>(e, "Line");
     em.addComponent<NodeTypeComponent>(e, NodeType::Line);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {30, 155, 255, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -105,8 +168,17 @@ static Entity createColour(EntityManager& em, float x, float y) {
     Entity e = em.createEntity();
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 100.0f, 100.0f);
+    em.addComponent<TitleComponent>(e, "Colour");
     em.addComponent<NodeTypeComponent>(e, NodeType::Colour);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {0, 255, 0, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -116,10 +188,20 @@ static Entity createComment(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 200.0f, 100.0f);
     em.addComponent<TextComponent>(e, "Comment");
+    em.addComponent<TitleComponent>(e, "Comment");
     em.addComponent<NodeTypeComponent>(e, NodeType::Comment);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {255, 228, 225, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
+
 
 //Node Code
 static Entity createCode(EntityManager& em, float x, float y) {
@@ -127,8 +209,17 @@ static Entity createCode(EntityManager& em, float x, float y) {
     em.addComponent<PositionComponent>(e, x, y);
     em.addComponent<sizeComponent>(e, 300.0f, 150.0f);
     em.addComponent<TextComponent>(e, "Code");
+    em.addComponent<TitleComponent>(e, "Code");
     em.addComponent<NodeTypeComponent>(e, NodeType::Code);
     em.addComponent<stateComponent>(e);
+    em.addComponent<StyleComponent>(e);
+
+    auto* style = em.getComponent<StyleComponent>(e);
+
+    style->backgroundColour = {200, 200, 200, 255};
+    style->textColour = {0, 0, 0, 255};
+    style->fontSize = 16;
+
     return e;
 }
 
@@ -174,6 +265,51 @@ Entity createNode(EntityManager& em, NodeType type, float x, float y) {
                << " at (" << x << ", " << y << ")\n";
 
     return result;
+}
+
+Entity cloneNode(EntityManager& em, Entity source, float x, float y) {
+    auto* type = em.getComponent<NodeTypeComponent>(source);
+
+    if (!type) return {};
+
+    Entity newNode = createNode(em, type->type, x, y);
+
+    if (auto* srcText = em.getComponent<TextComponent>(source)) {
+        auto* dstText = em.getComponent<TextComponent>(newNode);
+
+        if (dstText)
+            dstText->text = srcText->text;
+    }
+
+    if (auto* srcSize = em.getComponent<sizeComponent>(source)) {
+
+        auto* dstSize = em.getComponent<sizeComponent>(newNode);
+
+        if (dstSize) {
+            dstSize->width = srcSize->width;
+            dstSize->height = srcSize->height;
+        }
+    }
+
+    if (auto* srcImage = em.getComponent<ImageComponent>(source)) {
+
+        auto* dstImage = em.getComponent<ImageComponent>(newNode);
+
+        if (dstImage)
+            dstImage->path = srcImage->path;
+    }
+
+    return newNode;
+};
+
+Entity getSelectedEntity(EntityManager& em) {
+    for (auto e : em.getEntities()) {
+        auto* st = em.getComponent<stateComponent>(e);
+
+        if (st && st->isSelected)
+            return e;
+    }
+    return {};
 }
 
 //Handles deletion of nodes

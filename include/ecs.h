@@ -47,6 +47,31 @@ struct NodeTypeComponent {
 };
 
 // COMPONENTS (NO BASE CLASS)
+struct Colour {
+    Uint8 r = 255;
+    Uint8 g = 255;
+    Uint8 b = 255;
+    Uint8 a = 255;
+};
+
+struct StyleComponent {
+    Colour backgroundColour;
+    Colour textColour;
+
+    int fontSize = 16;
+
+    bool showBorder = false;
+
+    StyleComponent() = default;
+};
+
+struct TitleComponent {
+    std::string title;
+
+    TitleComponent() = default;
+    TitleComponent(const std::string& t) : title(t) {}
+};
+
 struct PositionComponent {
     float x = 0.0f;
     float y = 0.0f;
@@ -156,5 +181,7 @@ bool EntityManager::hasComponent(Entity entity) {
 
 // factory
 Entity createNode(EntityManager& em, NodeType type, float x, float y);
+Entity cloneNode(EntityManager& em, Entity source, float x, float y);
+Entity getSelectedEntity(EntityManager& em);
 void deleteNode(EntityManager& em);
 const char* nodeTypeToString(NodeType type);
