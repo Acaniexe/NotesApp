@@ -21,13 +21,19 @@ void updateNodeInteraction(InputState& input, EntityManager& em, Canvas& canvas,
         input.delPressed = false;
     }
 
-    bool overPanel = 
+    bool overTopPanel = 
         input.mouseX >= panels.top.x &&
         input.mouseX <= panels.top.x + panels.top.w &&
         input.mouseY >= panels.top.y &&
         input.mouseY <= panels.top.y + panels.top.h;
 
-    if (overPanel) return;
+    bool overBottomPanel = 
+        input.mouseX >= panels.bottom.x &&
+        input.mouseX <= panels.bottom.x + panels.bottom.w &&
+        input.mouseY >= panels.bottom.y &&
+        input.mouseY <= panels.bottom.y + panels.bottom.h;
+
+    if (overTopPanel || overBottomPanel) return;
 
     Vec2 mouseWorld = screenToWorld(canvas, input.mouseX, input.mouseY);
     static bool draggingStarted = false;
