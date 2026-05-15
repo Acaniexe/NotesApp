@@ -67,7 +67,7 @@ void render(App& app) {
     renderCanvas(app.renderer, app.canvas, app.windowWidth, app.windowHeight);
     renderNodes(app.renderer, app.font, app.EntityManager, app.canvas, app.windowWidth, app.windowHeight);
     renderUI(app.renderer, app.ui, app.input, app.canvas);
-    renderPanels(app.renderer, app.font, app.EntityManager, app.panels);
+    renderPanels(app.renderer, app.font, app.EntityManager, app.panels, app.input);
     endFrame(app.renderer);
 }
 

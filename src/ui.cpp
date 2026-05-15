@@ -209,7 +209,8 @@ void updateUIState(InputState& input, UI& ui, Canvas& canvas, EntityManager& ent
     }
 
     //Handles pin state
-    if (input.dockCollapsePressed) {
+    Entity selected = getSelectedEntity(entityManager);
+    if (input.dockCollapsePressed && !input.isTyping && !input.propertyEditing && selected.id == 0) {
         ui.isPinned = !ui.isPinned;
         input.dockCollapsePressed = false;
     }
@@ -315,7 +316,12 @@ void updatePanelsState(Panels& panels, EntityManager& em, InputState& input, int
         panels.panelWidth = std::clamp(newWidth, panels.minWidth, panels.maxWidth);
     }
 
+    bool overBottomPanel = input.mouseX >= panels.bottom.x && input.mouseX <= panels.bottom.x + panels.bottom.w &&
+                           input.mouseY >= panels.bottom.y && input.mouseY <= panels.bottom.y + panels.bottom.h;
+
     if (input.leftDown && !panels.isDraggingDivider && !panels.isDraggingWidth) {
+        bool clickedProperty = false;
+
         for (auto& entry : panels.entries) {
             bool over = 
                 input.mouseX >= entry.x &&
@@ -334,15 +340,36 @@ void updatePanelsState(Panels& panels, EntityManager& em, InputState& input, int
             if (st) st->isSelected = true;
 
             em.bringToFront(entry.entity);
-
+            clickedProperty = true;
             break;
+        }
+
+        if (overBottomPanel && !clickedProperty) {
+            for (auto& entry : panels.propertyEntries) {
+                bool over = 
+                    input.mouseX >= entry.x &&
+                    input.mouseX <= entry.x + entry.w &&
+                    input.mouseY >= entry.y &&
+                    input.mouseY <= entry.y + entry.h;
+
+                if (!over) continue;
+
+                input.propertyEditing = true;
+                input.activeProperty = entry.field;
+                input.propertyEditBuffer = entry.value;
+                clickedProperty = true;
+                break;
+            }
+        }
+
+        if (!clickedProperty) {
+            input.propertyEditing = false;
+            input.activeProperty = PropertyField::None;
+            input.propertyEditBuffer.clear();
         }
     }
 
     if (input.leftReleased) {
         panels.isDraggingWidth = false;
     }
-
-    //Properties tab inputs
-    
 }

@@ -217,8 +217,9 @@ void renderUI(SDL_Renderer* renderer, const UI& ui, const InputState& input, con
 }
 
 //Renders the side panels
-void renderPanels(SDL_Renderer* renderer, TTF_Font* font, EntityManager& em, Panels& panels) {
+void renderPanels(SDL_Renderer* renderer, TTF_Font* font, EntityManager& em, Panels& panels, const InputState& input) {
     panels.entries.clear();
+    panels.propertyEntries.clear();
 
     SDL_FRect top = { panels.top.x, panels.top.y, panels.top.w, panels.top.h };
     SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
@@ -236,8 +237,99 @@ void renderPanels(SDL_Renderer* renderer, TTF_Font* font, EntityManager& em, Pan
 
     float padding = 5.0f;
     float yOffset = panels.top.y + padding;
+    Entity selected = getSelectedEntity(em);
 
-    //Makes new list to display
+    auto renderText = [&](const std::string& text, float x, float y) {
+        SDL_Color color = {255, 255, 255, 255};
+        SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), text.length(), color);
+        if (!surface) return;
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FRect textRect = { x, y, (float)surface->w, (float)surface->h };
+        SDL_RenderTexture(renderer, texture, nullptr, &textRect);
+        SDL_DestroyTexture(texture);
+        SDL_DestroySurface(surface);
+    };
+
+    auto drawLabel = [&](const std::string& label, float x, float y) -> float {
+        SDL_Color color = {255, 255, 255, 255};
+        SDL_Surface* surface = TTF_RenderText_Blended(font, label.c_str(), label.length(), color);
+        if (!surface) return 0.0f;
+
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FRect textRect = { x, y, (float)surface->w, (float)surface->h };
+        SDL_RenderTexture(renderer, texture, nullptr, &textRect);
+
+        float width = (float)surface->w;
+        SDL_DestroyTexture(texture);
+        SDL_DestroySurface(surface);
+        return width;
+    };
+
+    auto drawInputBox = [&](const std::string& value, const SDL_FRect& boxRect, float textY, bool active) {
+        SDL_SetRenderDrawColor(renderer, 65, 65, 75, 255);
+        SDL_RenderFillRect(renderer, &boxRect);
+
+        SDL_SetRenderDrawColor(renderer, active ? 170 : 120, active ? 170 : 120, active ? 220 : 120, 255);
+        SDL_RenderRect(renderer, &boxRect);
+
+        SDL_Color color = {255, 255, 255, 255};
+        SDL_Surface* surface = TTF_RenderText_Blended(font, value.c_str(), value.length(), color);
+        if (surface) {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_FRect textRect = { boxRect.x + 6.0f, textY, (float)surface->w, (float)surface->h };
+            SDL_RenderTexture(renderer, texture, nullptr, &textRect);
+            SDL_DestroyTexture(texture);
+            SDL_DestroySurface(surface);
+        }
+    };
+
+    auto drawPropertyRow = [&](const std::string& label, const std::string& value, PropertyKind kind, PropertyField field) {
+        SDL_Color color = {255, 255, 255, 255};
+        SDL_Surface* labelSurface = TTF_RenderText_Blended(font, label.c_str(), label.length(), color);
+        SDL_Surface* valueSurface = TTF_RenderText_Blended(font, value.c_str(), value.length(), color);
+        if (!labelSurface || !valueSurface) {
+            if (labelSurface) SDL_DestroySurface(labelSurface);
+            if (valueSurface) SDL_DestroySurface(valueSurface);
+            return 0.0f;
+        }
+
+        float rowHeight = std::max((float)labelSurface->h, (float)valueSurface->h) + 14.0f;
+        SDL_FRect rowRect = { panels.bottom.x + padding, yOffset, panels.bottom.w - padding * 2.0f, rowHeight };
+
+        bool active = input.propertyEditing && input.activeProperty == field;
+        SDL_SetRenderDrawColor(renderer, 38, 38, 46, 255);
+        SDL_RenderFillRect(renderer, &rowRect);
+
+        float labelAreaWidth = rowRect.w * 0.38f;
+        SDL_FRect labelBg = { rowRect.x, rowRect.y, labelAreaWidth, rowRect.h };
+        SDL_SetRenderDrawColor(renderer, 48, 48, 58, 255);
+        SDL_RenderFillRect(renderer, &labelBg);
+
+        SDL_FRect inputRect = { rowRect.x + labelAreaWidth + 8.0f, rowRect.y + 5.0f, rowRect.w - labelAreaWidth - 13.0f, rowRect.h - 10.0f };
+
+        SDL_DestroySurface(labelSurface);
+        SDL_DestroySurface(valueSurface);
+
+        drawLabel(label, labelBg.x + 10.0f, labelBg.y + 5.0f);
+        drawInputBox(value, inputRect, inputRect.y + 1.0f, active);
+
+        panels.propertyEntries.push_back({
+            selected,
+            label,
+            value,
+            kind,
+            field,
+            rowRect.x,
+            rowRect.y,
+            rowRect.w,
+            rowRect.h
+        });
+
+        yOffset += rowHeight + 4.0f;
+        return rowHeight;
+    };
+
+    // Top panel contents
     std::vector<Entity> entities = em.getEntities();
     std::sort(entities.begin(), entities.end(), [](const Entity& a, const Entity& b) {
         return a.id < b.id;
@@ -284,6 +376,50 @@ void renderPanels(SDL_Renderer* renderer, TTF_Font* font, EntityManager& em, Pan
         SDL_DestroySurface(surface);
 
         if (yOffset > panels.top.y + panels.top.h) break;
+    }
+
+    // Bottom inspector / properties
+    float inspectorY = panels.bottom.y + padding;
+    if (selected.id == 0) {
+        return;
+    }
+
+    SDL_FRect headerRect = { panels.bottom.x + padding, inspectorY, panels.bottom.w - padding * 2.0f, 28.0f };
+    SDL_SetRenderDrawColor(renderer, 55, 55, 65, 255);
+    SDL_RenderFillRect(renderer, &headerRect);
+    drawLabel("Inspector", headerRect.x + 10.0f, headerRect.y + 6.0f);
+
+    inspectorY += headerRect.h + 8.0f;
+    yOffset = inspectorY;
+
+    auto* type = em.getComponent<NodeTypeComponent>(selected);
+    if (type) {
+        drawPropertyRow("Node Type", nodeTypeToString(type->type), PropertyKind::String, PropertyField::Title);
+    }
+
+    if (auto* pos = em.getComponent<PositionComponent>(selected)) {
+        drawPropertyRow("Position X", std::to_string(pos->x), PropertyKind::Float, PropertyField::PositionX);
+        drawPropertyRow("Position Y", std::to_string(pos->y), PropertyKind::Float, PropertyField::PositionY);
+    }
+
+    if (auto* size = em.getComponent<sizeComponent>(selected)) {
+        drawPropertyRow("Width", std::to_string(size->width), PropertyKind::Float, PropertyField::Width);
+        drawPropertyRow("Height", std::to_string(size->height), PropertyKind::Float, PropertyField::Height);
+    }
+
+    if (auto* text = em.getComponent<TextComponent>(selected)) {
+        drawPropertyRow("Text", text->text.empty() ? "(empty)" : text->text, PropertyKind::String, PropertyField::Text);
+    }
+
+    if (auto* image = em.getComponent<ImageComponent>(selected)) {
+        drawPropertyRow("Image Path", image->path.empty() ? "(none)" : image->path, PropertyKind::String, PropertyField::ImagePath);
+    }
+
+    if (auto* style = em.getComponent<StyleComponent>(selected)) {
+        drawPropertyRow("Text R", std::to_string(style->textColour.r), PropertyKind::Int, PropertyField::TextR);
+        drawPropertyRow("Text G", std::to_string(style->textColour.g), PropertyKind::Int, PropertyField::TextG);
+        drawPropertyRow("Text B", std::to_string(style->textColour.b), PropertyKind::Int, PropertyField::TextB);
+        drawPropertyRow("Text A", std::to_string(style->textColour.a), PropertyKind::Int, PropertyField::TextA);
     }
 }
 

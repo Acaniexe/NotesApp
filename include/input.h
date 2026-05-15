@@ -4,6 +4,25 @@
 class EntityManager;
 
 //Input states
+enum class PropertyField {
+    None,
+    Title,
+    PositionX,
+    PositionY,
+    Width,
+    Height,
+    Text,
+    ImagePath,
+    BackgroundR,
+    BackgroundG,
+    BackgroundB,
+    BackgroundA,
+    TextR,
+    TextG,
+    TextB,
+    TextA
+};
+
 struct InputState {
     bool windowResized = false;
 
@@ -33,6 +52,10 @@ struct InputState {
 
     std::string textInput;
     bool isTyping = false;
+
+    bool propertyEditing = false;
+    PropertyField activeProperty = PropertyField::None;
+    std::string propertyEditBuffer;
 
     float backspaceTimer = 0.0f;
     float backspaceDelay = 0.4f;

@@ -80,6 +80,21 @@ struct PanelEntry {
     float x, y, w, h;
 };
 
+enum class PropertyKind {
+    String,
+    Float,
+    Int
+};
+
+struct PanelPropertyEntry {
+    Entity entity;
+    std::string label;
+    std::string value;
+    PropertyKind kind;
+    PropertyField field;
+    float x, y, w, h;
+};
+
 //Panels state
 struct Panels {
     Panel top;
@@ -96,6 +111,7 @@ struct Panels {
     bool isDraggingWidth = false;
 
     std::vector<PanelEntry> entries;
+    std::vector<PanelPropertyEntry> propertyEntries;
 };
 
 //UI functions
